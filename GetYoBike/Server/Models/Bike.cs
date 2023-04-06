@@ -1,7 +1,6 @@
 ﻿namespace GetYoBike.Server.Models
 {
-    public class RentsCatalog
+    public class Bike
     {
-        
     }
 }
