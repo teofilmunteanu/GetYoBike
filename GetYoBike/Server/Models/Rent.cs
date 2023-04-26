@@ -1,6 +1,9 @@
-﻿namespace GetYoBike.Server.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace GetYoBike.Server.Models
 {
-    public class RentsCatalog
+    [PrimaryKey(nameof(UserID), nameof(BikeID))]
+    public class Rent
     {
         public string UserID { get; set; }
         public string BikeID { get; set; }
@@ -10,5 +13,8 @@
         public string CardExpMonth { get; set; }
         public string CardExpYear { get; set; }
         public string CardCVC { get; set; }
+
+        public Bike RentedBike { get; set; }
+        public User RenterUser { get; set; }
     }
 }
