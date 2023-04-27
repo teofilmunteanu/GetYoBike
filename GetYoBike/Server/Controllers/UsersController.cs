@@ -122,6 +122,7 @@ namespace GetYoBike.Server.Controllers
             return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
+        [HttpGet("{id}/{email}")]
         public async Task<IActionResult> ChangeEmail(int id, string email)
         {
             //User user = _context.Users.Where(u => u.Id == id).First();
