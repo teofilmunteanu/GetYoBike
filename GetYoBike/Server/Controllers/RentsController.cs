@@ -32,8 +32,8 @@ namespace GetYoBike.Server.Controllers
             return await _context.Rents.ToListAsync();
         }
 
-        // GET: api/Rents/5
-        [HttpGet("{id}")]
+        // GET: api/Rents/5/3
+        [HttpGet("{userId}/{bikeId}")]
         public async Task<ActionResult<Rent>> GetRent(int userId, int bikeId)
         {
           if (_context.Rents == null)
@@ -52,7 +52,7 @@ namespace GetYoBike.Server.Controllers
             return rent;
         }
 
-        // PUT: api/Rents/5
+        // PUT: api/Rents/5/3
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{userId}/{bikeId}")]
         public async Task<IActionResult> PutRent(int userId, int bikeId, Rent rent)
@@ -136,5 +136,14 @@ namespace GetYoBike.Server.Controllers
         {
             return (_context.Rents?.Any(e => e.UserID == userId && e.BikeID == bikeId)).GetValueOrDefault();
         }
+
+        //maybe change, how to map DateTime??
+        // GET: api/Rents/5/3
+        //[HttpGet]
+        //public async Task<ActionResult<Rent>> GetAvailableRents(DateTime dateTime)
+        //{
+            //get list of bikes that are not rented in specified interval
+            //return NotFound();
+        //}
     }
 }
