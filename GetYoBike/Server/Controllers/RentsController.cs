@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GetYoBike.Server.Data;
 using GetYoBike.Server.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -137,13 +138,18 @@ namespace GetYoBike.Server.Controllers
             return (_context.Rents?.Any(e => e.UserID == userId && e.BikeID == bikeId)).GetValueOrDefault();
         }
 
-        //maybe change, how to map DateTime??
-        // GET: api/Rents/5/3
-        //[HttpGet]
-        //public async Task<ActionResult<Rent>> GetAvailableRents(DateTime dateTime)
-        //{
+        // GET: api/Rents/date?=2011-08-12T20:17:46.384Z (or just date)
+        [HttpGet("/date")]
+        public async Task<ActionResult<List<Rent>>> GetAvailableRents([BindRequired]string dateTimeStr, [BindRequired] decimal duration)
+        {
+            DateTime dateTime;
+            //returns bool
+            DateTime.TryParse(dateTimeStr, out dateTime);
+
+            //Console.WriteLine($"Setialized to universal format{dateTime.ToString("yyyy-MM-dd'T'HH:mm:ssZ")}"); 
+            return NotFound();
             //get list of bikes that are not rented in specified interval
             //return NotFound();
-        //}
+        }
     }
 }

@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using GetYoBike.Server.Data;
 using GetYoBike.Server.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Build.Framework;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -122,7 +124,7 @@ namespace GetYoBike.Server.Controllers
             return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
-        [HttpGet("{id}/{email}")]
+        [HttpPut("/changeEmail/{id}")]
         public async Task<IActionResult> ChangeEmail(int id, string email)
         {
             //User user = _context.Users.Where(u => u.Id == id).First();
@@ -134,7 +136,7 @@ namespace GetYoBike.Server.Controllers
 
             user.Email = email;
             await _context.SaveChangesAsync();
-
+            
 
             return Ok(user);
         }
