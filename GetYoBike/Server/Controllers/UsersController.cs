@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GetYoBike.Server.Data;
 using GetYoBike.Server.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -119,6 +120,22 @@ namespace GetYoBike.Server.Controllers
         private bool UserExists(int id)
         {
             return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        public async Task<IActionResult> ChangeEmail(int id, string email)
+        {
+            //User user = _context.Users.Where(u => u.Id == id).First();
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.Email = email;
+            await _context.SaveChangesAsync();
+
+
+            return Ok(user);
         }
     }
 }
