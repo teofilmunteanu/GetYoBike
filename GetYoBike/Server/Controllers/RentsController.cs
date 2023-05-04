@@ -148,7 +148,7 @@ namespace GetYoBike.Server.Controllers
         }
 
         [HttpGet("id")]
-        private async Task<bool> DiscountValidater(int id) //await se foloseste inside a non-async method
+        public async Task<bool> DiscountValidater(int id) //await se foloseste inside a non-async method
         {
             var rent = await _context.Rents.FindAsync(id);
             if (rent == null)
