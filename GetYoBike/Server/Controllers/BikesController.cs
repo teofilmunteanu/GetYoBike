@@ -21,6 +21,14 @@ namespace GetYoBike.Server.Controllers
             _context = context;
         }
 
+        private static Bike ModelToEntity(BikeModel bikeModel) {
+            return new Bike()
+            {
+                Id = bikeModel.Id,
+                Type = BikeTypesController.ModelToEntity(bikeModel.Type)
+            };
+        }
+
         // GET: api/Bikes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Bike>>> GetBikes()

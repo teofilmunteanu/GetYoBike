@@ -6,9 +6,9 @@
         mountain
     }
 
-    public class BikeType
+    public class BikeTypeModel
     {
-        public BikeType(int id, decimal price, Types type)
+        public BikeTypeModel(int id, decimal price, Types type)
         {
             Id = id;
             Price = price;
@@ -18,6 +18,5 @@
         public int Id { get; set; }
         public decimal Price { get; set; }
         public Types Type { get; set; }
-        public List<Bike> Bikes { get; }
     }
 }
