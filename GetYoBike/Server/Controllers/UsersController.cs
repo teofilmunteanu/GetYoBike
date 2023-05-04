@@ -140,5 +140,33 @@ namespace GetYoBike.Server.Controllers
 
             return Ok(user);
         }
+
+        public async Task<IActionResult> ChangeName(int id, string name)//schimb numele de familie
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.Last_Name = name;
+            await _context.SaveChangesAsync();
+
+            return Ok(user);
+        }
+
+        private bool ValidaterEmail(string email)//o alta modalitate in care sa spun ca e valid/invalid mailul, adica sa scrie
+        {
+            if(email == null)
+                return false;
+            return email.Contains("@");//returneaza adresa care incepe cu "@"
+        }
+
+        private bool ValidaterAge(int age)
+        {
+            if (age<=14||age>=70)
+                return false;
+            return true;
+        }
     }
 }
