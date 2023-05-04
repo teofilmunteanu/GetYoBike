@@ -15,6 +15,8 @@ namespace GetYoBike.Server.Models
         public string CardExpYear { get; set; }
         public string CardCVC { get; set; }
 
+        public string PublicId { get; set; }
+
         public Bike RentedBike { get; set; }
         public User RenterUser { get; set; }
     }

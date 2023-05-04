@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GetYoBike.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230426213645_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20230504103753_Init1")]
+    partial class Init1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,18 +26,40 @@ namespace GetYoBike.Server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("TypeId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Bikes");
                 });
 
-            modelBuilder.Entity("GetYoBike.Server.Models.Rent", b =>
+            modelBuilder.Entity("GetYoBike.Server.Models.BikeType", b =>
                 {
-                    b.Property<string>("UserID")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("BikeID")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BikeType");
+                });
+
+            modelBuilder.Entity("GetYoBike.Server.Models.Rent", b =>
+                {
+                    b.Property<int>("UserID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BikeID")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CardCVC")
                         .IsRequired()
@@ -55,26 +77,28 @@ namespace GetYoBike.Server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("RentHoursDuration")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("RentStartDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("RentedBikeId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("UserID", "BikeID");
 
-                    b.HasIndex("RentedBikeId");
+                    b.HasIndex("BikeID");
 
                     b.ToTable("Rents");
                 });
 
             modelBuilder.Entity("GetYoBike.Server.Models.User", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -93,11 +117,22 @@ namespace GetYoBike.Server.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("GetYoBike.Server.Models.Bike", b =>
+                {
+                    b.HasOne("GetYoBike.Server.Models.BikeType", "Type")
+                        .WithMany()
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Type");
+                });
+
             modelBuilder.Entity("GetYoBike.Server.Models.Rent", b =>
                 {
                     b.HasOne("GetYoBike.Server.Models.Bike", "RentedBike")
                         .WithMany("Rents")
-                        .HasForeignKey("RentedBikeId")
+                        .HasForeignKey("BikeID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

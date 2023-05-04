@@ -23,7 +23,11 @@ namespace GetYoBike.Server.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Rent>().HasKey(r => new { r.UserID, r.BikeID });
 
+            modelBuilder.Entity<User>().HasData(
+                new User(1, "test@email", "test1F", "test1L")
+            );
         }
 
     }

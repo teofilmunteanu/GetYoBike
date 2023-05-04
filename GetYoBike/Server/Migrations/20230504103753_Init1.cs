@@ -6,28 +6,31 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GetYoBike.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Init1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Bikes",
+                name: "BikeType",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Price = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Bikes", x => x.Id);
+                    table.PrimaryKey("PK_BikeType", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     Last_Name = table.Column<string>(type: "TEXT", nullable: false),
                     First_Name = table.Column<string>(type: "TEXT", nullable: false)
@@ -38,25 +41,44 @@ namespace GetYoBike.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Bikes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TypeId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bikes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Bikes_BikeType_TypeId",
+                        column: x => x.TypeId,
+                        principalTable: "BikeType",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Rents",
                 columns: table => new
                 {
-                    UserID = table.Column<string>(type: "TEXT", nullable: false),
-                    BikeID = table.Column<string>(type: "TEXT", nullable: false),
+                    UserID = table.Column<int>(type: "INTEGER", nullable: false),
+                    BikeID = table.Column<int>(type: "INTEGER", nullable: false),
                     RentStartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     RentHoursDuration = table.Column<int>(type: "INTEGER", nullable: false),
                     CardNr = table.Column<string>(type: "TEXT", nullable: false),
                     CardExpMonth = table.Column<string>(type: "TEXT", nullable: false),
                     CardExpYear = table.Column<string>(type: "TEXT", nullable: false),
                     CardCVC = table.Column<string>(type: "TEXT", nullable: false),
-                    RentedBikeId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PublicId = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Rents", x => new { x.UserID, x.BikeID });
                     table.ForeignKey(
-                        name: "FK_Rents_Bikes_RentedBikeId",
-                        column: x => x.RentedBikeId,
+                        name: "FK_Rents_Bikes_BikeID",
+                        column: x => x.BikeID,
                         principalTable: "Bikes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -69,9 +91,14 @@ namespace GetYoBike.Server.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rents_RentedBikeId",
+                name: "IX_Bikes_TypeId",
+                table: "Bikes",
+                column: "TypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rents_BikeID",
                 table: "Rents",
-                column: "RentedBikeId");
+                column: "BikeID");
         }
 
         /// <inheritdoc />
@@ -85,6 +112,9 @@ namespace GetYoBike.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "BikeType");
         }
     }
 }

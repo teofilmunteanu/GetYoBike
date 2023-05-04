@@ -8,9 +8,9 @@
 
     public class BikeType
     {
-        public int id;
-        public decimal Price;
-        public Types Type;
-        public List<Bike> Bikes;
+        public int Id { get; set; }
+        public decimal Price { get; set; }
+        public Types Type { get; set; }
+        public List<Bike> Bikes { get; } = new();
     }
 }

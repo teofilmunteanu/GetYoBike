@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GetYoBike.Server.Data;
+﻿using GetYoBike.Server.Data;
 using GetYoBike.Server.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -26,23 +21,21 @@ namespace GetYoBike.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Rent>>> GetRents()
         {
-          if (_context.Rents == null)
-          {
-              return NotFound();
-          }
+            if (_context.Rents == null)
+            {
+                return NotFound();
+            }
             return await _context.Rents.ToListAsync();
         }
 
-        // GET: api/Rents/5/3
-        [HttpGet("{userId}/{bikeId}")]
+        // GET: api/Rents/5
+        [HttpGet("{bikeId}/{userId}")]
         public async Task<ActionResult<Rent>> GetRent(int userId, int bikeId)
         {
-          if (_context.Rents == null)
-          {
-              return NotFound();
-          }
-
-          //might not work
+            if (_context.Rents == null)
+            {
+                return NotFound();
+            }
             var rent = await _context.Rents.FindAsync(userId, bikeId);
 
             if (rent == null)
@@ -53,9 +46,9 @@ namespace GetYoBike.Server.Controllers
             return rent;
         }
 
-        // PUT: api/Rents/5/3
+        // PUT: api/Rents/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{userId}/{bikeId}")]
+        [HttpPut("{bikeId}/{userId}")]
         public async Task<IActionResult> PutRent(int userId, int bikeId, Rent rent)
         {
             if (userId != rent.UserID || bikeId != rent.BikeID)
@@ -89,10 +82,10 @@ namespace GetYoBike.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Rent>> PostRent(Rent rent)
         {
-          if (_context.Rents == null)
-          {
-              return Problem("Entity set 'DataContext.Rents'  is null.");
-          }
+            if (_context.Rents == null)
+            {
+                return Problem("Entity set 'DataContext.Rents'  is null.");
+            }
             _context.Rents.Add(rent);
             try
             {
@@ -110,7 +103,7 @@ namespace GetYoBike.Server.Controllers
                 }
             }
 
-            return CreatedAtAction("GetRent", new { userId = rent.UserID, bikeId = rent.BikeID }, rent);
+            return CreatedAtAction("GetRent", new { id = rent.UserID }, rent);
         }
 
         // DELETE: api/Rents/5
@@ -140,7 +133,7 @@ namespace GetYoBike.Server.Controllers
 
         // GET: api/Rents/date?=2011-08-12T20:17:46.384Z (or just date)
         [HttpGet("/date")]
-        public async Task<ActionResult<List<Rent>>> GetAvailableRents([BindRequired]string dateTimeStr, [BindRequired] decimal duration)
+        public async Task<ActionResult<List<Rent>>> GetAvailableRents([BindRequired] string dateTimeStr, [BindRequired] decimal duration)
         {
             DateTime dateTime;
             //returns bool
