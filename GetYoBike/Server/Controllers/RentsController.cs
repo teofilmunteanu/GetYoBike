@@ -49,6 +49,7 @@ namespace GetYoBike.Server.Controllers
         // PUT: api/Rents/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{bikeId}/{userId}")]
+        //functiile put sunt cele care dau UPDATE la ceva din DB
         public async Task<IActionResult> PutRent(int userId, int bikeId, Rent rent)
         {
             if (userId != rent.UserID || bikeId != rent.BikeID)
@@ -82,7 +83,8 @@ namespace GetYoBike.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Rent>> PostRent(Rent rent)
         {
-            if (_context.Rents == null)
+            if (_context.Rents == null)//mereu cand scrie "_context" inseamna ca se uita in baza de date dupa orice urmeaza dupa .
+                //spre ex"_context.Rents" se uita in baza de date de la rents
             {
                 return Problem("Entity set 'DataContext.Rents'  is null.");
             }
@@ -144,5 +146,16 @@ namespace GetYoBike.Server.Controllers
             //get list of bikes that are not rented in specified interval
             //return NotFound();
         }
+
+        [HttpGet("checkDiscount/{id}")]
+        public async Task<bool> DiscountValidater(int id) //await se foloseste inside a non-async method
+        {
+            var rent = await _context.Rents.FindAsync(id);
+            if (rent == null)
+                return false;
+            return true;
+        }
+
     }
+
 }

@@ -141,6 +141,9 @@ namespace GetYoBike.Server.Controllers
             return Ok(user);
         }
 
+        //POST postez ceva nou
+        //PUT schimb ceva existent
+        [HttpPut("changeFirstName/{id}")]//astea sunt link-uri
         public async Task<IActionResult> ChangeFirstName(int id, string name)
         {
             var user = await _context.Users.FindAsync(id);
@@ -155,6 +158,7 @@ namespace GetYoBike.Server.Controllers
             return Ok(user);
         }
 
+        [HttpPut("changeLastName/{id}")]
         public async Task<IActionResult> ChangeLastName(int id, string name)
         {
             var user = await _context.Users.FindAsync(id);
@@ -169,14 +173,18 @@ namespace GetYoBike.Server.Controllers
             return Ok(user);
         }
 
-        private bool ValidaterEmail(string email)//o alta modalitate in care sa spun ca e valid/invalid mailul, adica sa scrie
+        //imi da ceva, nu schimba o informatie
+        [HttpGet("checkEmail")]
+        //ceea ce este in ghilimele este path-ul pe care trebuie sa l urmez 
+        public bool ValidaterEmail(string email)//o alta modalitate in care sa spun ca e valid/invalid mailul, adica sa scrie
         {
             if(email == null)
                 return false;
             return email.Contains("@");//returneaza adresa care incepe cu "@"
         }
 
-        private bool ValidaterAge(int age)
+        [HttpGet("checkAge")]
+        public bool ValidaterAge(int age)
         {
             if (age<=14||age>=70)
                 return false;
