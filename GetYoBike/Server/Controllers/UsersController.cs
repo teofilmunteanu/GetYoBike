@@ -176,7 +176,7 @@ namespace GetYoBike.Server.Controllers
         //imi da ceva, nu schimba o informatie
         [HttpGet("checkEmail")]
         //ceea ce este in ghilimele este path-ul pe care trebuie sa l urmez 
-        private bool ValidaterEmail(string email)//o alta modalitate in care sa spun ca e valid/invalid mailul, adica sa scrie
+        public bool ValidaterEmail(string email)//o alta modalitate in care sa spun ca e valid/invalid mailul, adica sa scrie
         {
             if(email == null)
                 return false;
@@ -184,7 +184,7 @@ namespace GetYoBike.Server.Controllers
         }
 
         [HttpGet("checkAge")]
-        private bool ValidaterAge(int age)
+        public bool ValidaterAge(int age)
         {
             if (age<=14||age>=70)
                 return false;
