@@ -141,7 +141,7 @@ namespace GetYoBike.Server.Controllers
             return Ok(user);
         }
 
-        public async Task<IActionResult> ChangeName(int id, string name)//schimb numele de familie
+        public async Task<IActionResult> ChangeFirstName(int id, string name)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -149,7 +149,21 @@ namespace GetYoBike.Server.Controllers
                 return NotFound();
             }
 
-            user.Last_Name = name;
+            user.FirstName = name;
+            await _context.SaveChangesAsync();
+
+            return Ok(user);
+        }
+
+        public async Task<IActionResult> ChangeLastName(int id, string name)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.LastName = name;
             await _context.SaveChangesAsync();
 
             return Ok(user);
