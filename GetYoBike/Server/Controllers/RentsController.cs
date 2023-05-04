@@ -132,7 +132,7 @@ namespace GetYoBike.Server.Controllers
         }
 
         // GET: api/Rents/date?=2011-08-12T20:17:46.384Z (or just date)
-        [HttpGet("/date")]
+        [HttpGet("date")]
         public async Task<ActionResult<List<Rent>>> GetAvailableRents([BindRequired] string dateTimeStr, [BindRequired] decimal duration)
         {
             DateTime dateTime;

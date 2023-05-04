@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GetYoBike.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230504103938_Init2")]
-    partial class Init2
+    [Migration("20230504151554_init2")]
+    partial class init2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,7 +50,21 @@ namespace GetYoBike.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BikeType");
+                    b.ToTable("BikeTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Price = 5m,
+                            Type = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Price = 10m,
+                            Type = 1
+                        });
                 });
 
             modelBuilder.Entity("GetYoBike.Server.Models.Rent", b =>

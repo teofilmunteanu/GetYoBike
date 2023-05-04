@@ -47,7 +47,21 @@ namespace GetYoBike.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BikeType");
+                    b.ToTable("BikeTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Price = 5m,
+                            Type = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Price = 10m,
+                            Type = 1
+                        });
                 });
 
             modelBuilder.Entity("GetYoBike.Server.Models.Rent", b =>

@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GetYoBike.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class Init1 : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "BikeType",
+                name: "BikeTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -22,7 +22,7 @@ namespace GetYoBike.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BikeType", x => x.Id);
+                    table.PrimaryKey("PK_BikeTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -32,8 +32,8 @@ namespace GetYoBike.Server.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
-                    Last_Name = table.Column<string>(type: "TEXT", nullable: false),
-                    First_Name = table.Column<string>(type: "TEXT", nullable: false)
+                    LastName = table.Column<string>(type: "TEXT", nullable: false),
+                    FirstName = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -52,9 +52,9 @@ namespace GetYoBike.Server.Migrations
                 {
                     table.PrimaryKey("PK_Bikes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Bikes_BikeType_TypeId",
+                        name: "FK_Bikes_BikeTypes_TypeId",
                         column: x => x.TypeId,
-                        principalTable: "BikeType",
+                        principalTable: "BikeTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -90,6 +90,11 @@ namespace GetYoBike.Server.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Email", "FirstName", "LastName" },
+                values: new object[] { 1, "test@email", "test1L", "test1F" });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Bikes_TypeId",
                 table: "Bikes",
@@ -114,7 +119,7 @@ namespace GetYoBike.Server.Migrations
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "BikeType");
+                name: "BikeTypes");
         }
     }
 }

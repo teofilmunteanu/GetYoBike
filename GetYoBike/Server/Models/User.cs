@@ -2,17 +2,12 @@
 {
     public class User
     {
-        private object value1;
-        private object value2;
-        private object value3;
-        private object value4;
-
         public User(int id, string email, string lastName, string firstName)
         {
-            this.Id = id;
-            this.Email = email;
-            this.LastName = lastName;
-            this.FirstName = firstName;
+            Id = id;
+            Email = email;
+            LastName = lastName;
+            FirstName = firstName;
         }
 
         public int Id { get; set; }

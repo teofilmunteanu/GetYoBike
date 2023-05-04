@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GetYoBike.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230504103753_Init1")]
-    partial class Init1
+    [Migration("20230504151426_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,7 +50,7 @@ namespace GetYoBike.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BikeType");
+                    b.ToTable("BikeTypes");
                 });
 
             modelBuilder.Entity("GetYoBike.Server.Models.Rent", b =>
@@ -104,23 +104,32 @@ namespace GetYoBike.Server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("First_Name")
+                    b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Last_Name")
+                    b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "test@email",
+                            FirstName = "test1L",
+                            LastName = "test1F"
+                        });
                 });
 
             modelBuilder.Entity("GetYoBike.Server.Models.Bike", b =>
                 {
                     b.HasOne("GetYoBike.Server.Models.BikeType", "Type")
-                        .WithMany()
+                        .WithMany("Bikes")
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -150,6 +159,11 @@ namespace GetYoBike.Server.Migrations
             modelBuilder.Entity("GetYoBike.Server.Models.Bike", b =>
                 {
                     b.Navigation("Rents");
+                });
+
+            modelBuilder.Entity("GetYoBike.Server.Models.BikeType", b =>
+                {
+                    b.Navigation("Bikes");
                 });
 
             modelBuilder.Entity("GetYoBike.Server.Models.User", b =>
