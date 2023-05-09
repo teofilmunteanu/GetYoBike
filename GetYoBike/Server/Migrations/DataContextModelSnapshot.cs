@@ -17,7 +17,7 @@ namespace GetYoBike.Server.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
 
-            modelBuilder.Entity("GetYoBike.Server.Models.Bike", b =>
+            modelBuilder.Entity("GetYoBike.Server.Entities.Bike", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,7 +33,7 @@ namespace GetYoBike.Server.Migrations
                     b.ToTable("Bikes");
                 });
 
-            modelBuilder.Entity("GetYoBike.Server.Models.BikeType", b =>
+            modelBuilder.Entity("GetYoBike.Server.Entities.BikeType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -64,7 +64,7 @@ namespace GetYoBike.Server.Migrations
                         });
                 });
 
-            modelBuilder.Entity("GetYoBike.Server.Models.Rent", b =>
+            modelBuilder.Entity("GetYoBike.Server.Entities.Rent", b =>
                 {
                     b.Property<int>("UserID")
                         .HasColumnType("INTEGER");
@@ -105,7 +105,7 @@ namespace GetYoBike.Server.Migrations
                     b.ToTable("Rents");
                 });
 
-            modelBuilder.Entity("GetYoBike.Server.Models.User", b =>
+            modelBuilder.Entity("GetYoBike.Server.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -129,11 +129,21 @@ namespace GetYoBike.Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Age = 5,
+                            Email = "test",
+                            FirstName = "test",
+                            LastName = "test"
+                        });
                 });
 
-            modelBuilder.Entity("GetYoBike.Server.Models.Bike", b =>
+            modelBuilder.Entity("GetYoBike.Server.Entities.Bike", b =>
                 {
-                    b.HasOne("GetYoBike.Server.Models.BikeType", "Type")
+                    b.HasOne("GetYoBike.Server.Entities.BikeType", "Type")
                         .WithMany("Bikes")
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -142,15 +152,15 @@ namespace GetYoBike.Server.Migrations
                     b.Navigation("Type");
                 });
 
-            modelBuilder.Entity("GetYoBike.Server.Models.Rent", b =>
+            modelBuilder.Entity("GetYoBike.Server.Entities.Rent", b =>
                 {
-                    b.HasOne("GetYoBike.Server.Models.Bike", "RentedBike")
+                    b.HasOne("GetYoBike.Server.Entities.Bike", "RentedBike")
                         .WithMany("Rents")
                         .HasForeignKey("BikeID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GetYoBike.Server.Models.User", "RenterUser")
+                    b.HasOne("GetYoBike.Server.Entities.User", "RenterUser")
                         .WithMany("Rents")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -161,17 +171,17 @@ namespace GetYoBike.Server.Migrations
                     b.Navigation("RenterUser");
                 });
 
-            modelBuilder.Entity("GetYoBike.Server.Models.Bike", b =>
+            modelBuilder.Entity("GetYoBike.Server.Entities.Bike", b =>
                 {
                     b.Navigation("Rents");
                 });
 
-            modelBuilder.Entity("GetYoBike.Server.Models.BikeType", b =>
+            modelBuilder.Entity("GetYoBike.Server.Entities.BikeType", b =>
                 {
                     b.Navigation("Bikes");
                 });
 
-            modelBuilder.Entity("GetYoBike.Server.Models.User", b =>
+            modelBuilder.Entity("GetYoBike.Server.Entities.User", b =>
                 {
                     b.Navigation("Rents");
                 });

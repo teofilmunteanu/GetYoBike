@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace GetYoBike.Server.Models
+namespace GetYoBike.Server.Entities
 {
     [PrimaryKey(nameof(UserID), nameof(BikeID))]
     public class Rent

@@ -1,9 +1,9 @@
-﻿namespace GetYoBike.Server.Models
+﻿namespace GetYoBike.Shared.Models
 {
     public class BikeModel
     {
         public int Id { get; set; }
-        public BikeTypeModel Type { get; set; }
+        public int TypeId { get; set; }
 
     }
 }

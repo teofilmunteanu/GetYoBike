@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using GetYoBike.Server.Data;
+using GetYoBike.Server.Entities;
+using GetYoBike.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using GetYoBike.Server.Data;
-using GetYoBike.Server.Models;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -21,22 +17,32 @@ namespace GetYoBike.Server.Controllers
             _context = context;
         }
 
-        private static Bike ModelToEntity(BikeModel bikeModel) {
-            return new Bike()
+        private Bike ModelToEntity(BikeModel bikeModel)
+        {
+            //this doesn't find the bikeType
+            BikeType? bikeType = _context.BikeTypes.Find(bikeModel.TypeId);
+            if (bikeType != null)
             {
-                Id = bikeModel.Id,
-                Type = BikeTypesController.ModelToEntity(bikeModel.Type)
-            };
+                return new Bike()
+                {
+                    Id = bikeModel.Id,
+                    Type = bikeType
+                };
+            }
+            else
+            {
+                return new Bike();
+            }
         }
 
         // GET: api/Bikes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Bike>>> GetBikes()
         {
-          if (_context.Bikes == null)
-          {
-              return NotFound();
-          }
+            if (_context.Bikes == null)
+            {
+                return NotFound();
+            }
             return await _context.Bikes.ToListAsync();
         }
 
@@ -44,10 +50,10 @@ namespace GetYoBike.Server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Bike>> GetBike(int id)
         {
-          if (_context.Bikes == null)
-          {
-              return NotFound();
-          }
+            if (_context.Bikes == null)
+            {
+                return NotFound();
+            }
             var bike = await _context.Bikes.FindAsync(id);
 
             if (bike == null)
@@ -61,8 +67,10 @@ namespace GetYoBike.Server.Controllers
         // PUT: api/Bikes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBike(int id, Bike bike)
+        public async Task<IActionResult> PutBike(int id, BikeModel bikeModel)
         {
+            Bike bike = ModelToEntity(bikeModel);
+
             if (id != bike.Id)
             {
                 return BadRequest();
@@ -92,12 +100,14 @@ namespace GetYoBike.Server.Controllers
         // POST: api/Bikes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Bike>> PostBike(Bike bike)
+        public async Task<ActionResult<Bike>> PostBike(BikeModel bikeModel)
         {
-          if (_context.Bikes == null)
-          {
-              return Problem("Entity set 'DataContext.Bikes'  is null.");
-          }
+            Bike bike = ModelToEntity(bikeModel);
+
+            if (_context.Bikes == null)
+            {
+                return Problem("Entity set 'DataContext.Bikes'  is null.");
+            }
             _context.Bikes.Add(bike);
             await _context.SaveChangesAsync();
 

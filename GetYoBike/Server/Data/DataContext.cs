@@ -1,4 +1,4 @@
-﻿using GetYoBike.Server.Models;
+﻿using GetYoBike.Server.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace GetYoBike.Server.Data
@@ -20,9 +20,31 @@ namespace GetYoBike.Server.Data
         {
             modelBuilder.Entity<Rent>().HasKey(r => new { r.UserID, r.BikeID });
 
+
             modelBuilder.Entity<BikeType>().HasData(
-                new BikeType(1,5,Types.city),
-                new BikeType(2,10,Types.mountain)
+                new BikeType()
+                {
+                    Id = 1,
+                    Price = 5,
+                    Type = Types.city
+                },
+                new BikeType()
+                {
+                    Id = 2,
+                    Price = 10,
+                    Type = Types.mountain
+                }
+            );
+
+            modelBuilder.Entity<User>().HasData(
+                new User()
+                {
+                    Id = 1,
+                    Email = "test",
+                    LastName = "test",
+                    FirstName = "test",
+                    Age = 5
+                }
             );
         }
 

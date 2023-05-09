@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace GetYoBike.Server.Migrations
 {
     /// <inheritdoc />
@@ -33,7 +35,8 @@ namespace GetYoBike.Server.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     LastName = table.Column<string>(type: "TEXT", nullable: false),
-                    FirstName = table.Column<string>(type: "TEXT", nullable: false)
+                    FirstName = table.Column<string>(type: "TEXT", nullable: false),
+                    Age = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -91,9 +94,18 @@ namespace GetYoBike.Server.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "BikeTypes",
+                columns: new[] { "Id", "Price", "Type" },
+                values: new object[,]
+                {
+                    { 1, 5m, 0 },
+                    { 2, 10m, 1 }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "Email", "FirstName", "LastName" },
-                values: new object[] { 1, "test@email", "test1L", "test1F" });
+                columns: new[] { "Id", "Age", "Email", "FirstName", "LastName" },
+                values: new object[] { 1, 5, "test", "test", "test" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Bikes_TypeId",

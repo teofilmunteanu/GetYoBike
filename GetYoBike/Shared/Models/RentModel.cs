@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace GetYoBike.Server.Models
+﻿namespace GetYoBike.Shared.Models
 {
-    [PrimaryKey(nameof(UserID), nameof(BikeID))]
     public class RentModel
     {
         public int UserID { get; set; }

@@ -1,5 +1,6 @@
 ﻿using GetYoBike.Server.Data;
-using GetYoBike.Server.Models;
+using GetYoBike.Server.Entities;
+using GetYoBike.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,36 @@ namespace GetYoBike.Server.Controllers
         public RentsController(DataContext context)
         {
             _context = context;
+        }
+
+        private Rent ModelToEntity(RentModel bikeTypeModel)
+        {
+            User? renterUser = _context.Users.Find(bikeTypeModel.UserID);
+            Bike? rentedBike = _context.Bikes.Find(bikeTypeModel.BikeID);
+
+            if (renterUser != null && rentedBike != null)
+            {
+                return new Rent()
+                {
+                    UserID = bikeTypeModel.UserID,
+                    BikeID = bikeTypeModel.BikeID,
+                    RentStartDate = bikeTypeModel.RentStartDate,
+                    RentHoursDuration = bikeTypeModel.RentHoursDuration,
+                    CardNr = bikeTypeModel.CardNr,
+                    CardExpMonth = bikeTypeModel.CardExpMonth,
+                    CardExpYear = bikeTypeModel.CardExpYear,
+                    CardCVC = bikeTypeModel.CardCVC,
+                    PublicId = bikeTypeModel.PublicId,
+                    RenterUser = renterUser,
+                    RentedBike = rentedBike
+                };
+            }
+            else
+            {
+                return new Rent();
+            }
+
+
         }
 
         // GET: api/Rents
@@ -50,8 +81,10 @@ namespace GetYoBike.Server.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{bikeId}/{userId}")]
         //functiile put sunt cele care dau UPDATE la ceva din DB
-        public async Task<IActionResult> PutRent(int userId, int bikeId, Rent rent)
+        public async Task<IActionResult> PutRent(int userId, int bikeId, RentModel rentModel)
         {
+            Rent rent = ModelToEntity(rentModel);
+
             if (userId != rent.UserID || bikeId != rent.BikeID)
             {
                 return BadRequest();
@@ -81,10 +114,12 @@ namespace GetYoBike.Server.Controllers
         // POST: api/Rents
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Rent>> PostRent(Rent rent)
+        public async Task<ActionResult<Rent>> PostRent(RentModel rentModel)
         {
+            Rent rent = ModelToEntity(rentModel);
+
             if (_context.Rents == null)//mereu cand scrie "_context" inseamna ca se uita in baza de date dupa orice urmeaza dupa .
-                //spre ex"_context.Rents" se uita in baza de date de la rents
+                                       //spre ex"_context.Rents" se uita in baza de date de la rents
             {
                 return Problem("Entity set 'DataContext.Rents'  is null.");
             }

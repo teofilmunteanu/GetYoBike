@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using GetYoBike.Server.Data;
+using GetYoBike.Server.Entities;
+using GetYoBike.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using GetYoBike.Server.Data;
-using GetYoBike.Server.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Build.Framework;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -24,14 +17,26 @@ namespace GetYoBike.Server.Controllers
             _context = context;
         }
 
+        private User ModelToEntity(UserModel userModel)
+        {
+            return new User()
+            {
+                Id = userModel.Id,
+                Email = userModel.Email,
+                LastName = userModel.LastName,
+                FirstName = userModel.FirstName,
+                Age = userModel.Age
+            };
+        }
+
         // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-          if (_context.Users == null)
-          {
-              return NotFound();
-          }
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
             return await _context.Users.ToListAsync();
         }
 
@@ -39,10 +44,10 @@ namespace GetYoBike.Server.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-          if (_context.Users == null)
-          {
-              return NotFound();
-          }
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
             var user = await _context.Users.FindAsync(id);
 
             if (user == null)
@@ -56,8 +61,10 @@ namespace GetYoBike.Server.Controllers
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        public async Task<IActionResult> PutUser(int id, UserModel userModel)
         {
+            User user = ModelToEntity(userModel);
+
             if (id != user.Id)
             {
                 return BadRequest();
@@ -87,12 +94,14 @@ namespace GetYoBike.Server.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> PostUser(UserModel userModel)
         {
-          if (_context.Users == null)
-          {
-              return Problem("Entity set 'DataContext.Users'  is null.");
-          }
+            User user = ModelToEntity(userModel);
+
+            if (_context.Users == null)
+            {
+                return Problem("Entity set 'DataContext.Users'  is null.");
+            }
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -136,7 +145,7 @@ namespace GetYoBike.Server.Controllers
 
             user.Email = email;
             await _context.SaveChangesAsync();
-            
+
 
             return Ok(user);
         }
@@ -178,7 +187,7 @@ namespace GetYoBike.Server.Controllers
         //ceea ce este in ghilimele este path-ul pe care trebuie sa l urmez 
         public bool ValidaterEmail(string email)//o alta modalitate in care sa spun ca e valid/invalid mailul, adica sa scrie
         {
-            if(email == null)
+            if (email == null)
                 return false;
             return email.Contains("@");//returneaza adresa care incepe cu "@"
         }
@@ -186,7 +195,7 @@ namespace GetYoBike.Server.Controllers
         [HttpGet("checkAge")]
         public bool ValidaterAge(int age)
         {
-            if (age<=14||age>=70)
+            if (age <= 14 || age >= 70)
                 return false;
             return true;
         }
