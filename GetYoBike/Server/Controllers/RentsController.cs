@@ -18,34 +18,31 @@ namespace GetYoBike.Server.Controllers
             _context = context;
         }
 
-        private Rent ModelToEntity(RentModel bikeTypeModel)
+        private Rent? ModelToEntity(RentModel bikeTypeModel)
         {
             User? renterUser = _context.Users.Find(bikeTypeModel.UserID);
             Bike? rentedBike = _context.Bikes.Find(bikeTypeModel.BikeID);
 
-            if (renterUser != null && rentedBike != null)
+            if (renterUser == null || rentedBike == null)
             {
-                return new Rent()
-                {
-                    UserID = bikeTypeModel.UserID,
-                    BikeID = bikeTypeModel.BikeID,
-                    RentStartDate = bikeTypeModel.RentStartDate,
-                    RentHoursDuration = bikeTypeModel.RentHoursDuration,
-                    CardNr = bikeTypeModel.CardNr,
-                    CardExpMonth = bikeTypeModel.CardExpMonth,
-                    CardExpYear = bikeTypeModel.CardExpYear,
-                    CardCVC = bikeTypeModel.CardCVC,
-                    PublicId = bikeTypeModel.PublicId,
-                    RenterUser = renterUser,
-                    RentedBike = rentedBike
-                };
+                return null;
             }
-            else
+            //eventually throw exception to be catched below(PUT/POST) and return bad request with exception error msg
+
+            return new Rent()
             {
-                return new Rent();
-            }
-
-
+                UserID = bikeTypeModel.UserID,
+                BikeID = bikeTypeModel.BikeID,
+                RentStartDate = bikeTypeModel.RentStartDate,
+                RentHoursDuration = bikeTypeModel.RentHoursDuration,
+                CardNr = bikeTypeModel.CardNr,
+                CardExpMonth = bikeTypeModel.CardExpMonth,
+                CardExpYear = bikeTypeModel.CardExpYear,
+                CardCVC = bikeTypeModel.CardCVC,
+                PublicId = bikeTypeModel.PublicId,
+                RenterUser = renterUser,
+                RentedBike = rentedBike
+            };
         }
 
         // GET: api/Rents
@@ -83,9 +80,9 @@ namespace GetYoBike.Server.Controllers
         //functiile put sunt cele care dau UPDATE la ceva din DB
         public async Task<IActionResult> PutRent(int userId, int bikeId, RentModel rentModel)
         {
-            Rent rent = ModelToEntity(rentModel);
+            Rent? rent = ModelToEntity(rentModel);
 
-            if (userId != rent.UserID || bikeId != rent.BikeID)
+            if (rent == null || userId != rent.UserID || bikeId != rent.BikeID)
             {
                 return BadRequest();
             }
@@ -116,7 +113,12 @@ namespace GetYoBike.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Rent>> PostRent(RentModel rentModel)
         {
-            Rent rent = ModelToEntity(rentModel);
+            Rent? rent = ModelToEntity(rentModel);
+
+            if (rent == null)
+            {
+                return BadRequest();
+            }
 
             if (_context.Rents == null)//mereu cand scrie "_context" inseamna ca se uita in baza de date dupa orice urmeaza dupa .
                                        //spre ex"_context.Rents" se uita in baza de date de la rents

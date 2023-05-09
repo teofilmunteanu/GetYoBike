@@ -17,22 +17,20 @@ namespace GetYoBike.Server.Controllers
             _context = context;
         }
 
-        private Bike ModelToEntity(BikeModel bikeModel)
+        private Bike? ModelToEntity(BikeModel bikeModel)
         {
-            //this doesn't find the bikeType
-            BikeType? bikeType = _context.BikeTypes.Find(bikeModel.TypeId);
-            if (bikeType != null)
+            BikeType? bikeType = _context.BikeTypes.Find(bikeModel.TypeId); //_context.BikeTypes.FirstOrDefault(b => b.Type == (Types)bikeModel.TypeId);
+            if (bikeType == null)
             {
-                return new Bike()
-                {
-                    Id = bikeModel.Id,
-                    Type = bikeType
-                };
+                return null;
             }
-            else
+            //eventually throw exception to be catched below(PUT/POST) and return bad request with exception error msg
+
+            return new Bike()
             {
-                return new Bike();
-            }
+                Id = bikeModel.Id,
+                Type = bikeType
+            };
         }
 
         // GET: api/Bikes
@@ -69,9 +67,9 @@ namespace GetYoBike.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBike(int id, BikeModel bikeModel)
         {
-            Bike bike = ModelToEntity(bikeModel);
+            Bike? bike = ModelToEntity(bikeModel);
 
-            if (id != bike.Id)
+            if (bike == null || id != bike.Id)
             {
                 return BadRequest();
             }
@@ -102,7 +100,12 @@ namespace GetYoBike.Server.Controllers
         [HttpPost]
         public async Task<ActionResult<Bike>> PostBike(BikeModel bikeModel)
         {
-            Bike bike = ModelToEntity(bikeModel);
+            Bike? bike = ModelToEntity(bikeModel);
+
+            if (bike == null)
+            {
+                return BadRequest();
+            }
 
             if (_context.Bikes == null)
             {
