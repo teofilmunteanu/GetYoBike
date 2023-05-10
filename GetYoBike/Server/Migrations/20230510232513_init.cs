@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace GetYoBike.Server.Migrations
 {
     /// <inheritdoc />
@@ -92,20 +90,6 @@ namespace GetYoBike.Server.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.InsertData(
-                table: "BikeTypes",
-                columns: new[] { "Id", "Price", "Type" },
-                values: new object[,]
-                {
-                    { 1, 5m, 0 },
-                    { 2, 10m, 1 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "Age", "Email", "FirstName", "LastName" },
-                values: new object[] { 1, 5, "test", "test", "test" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Bikes_TypeId",

@@ -23,7 +23,7 @@ namespace GetYoBike.Server.Controllers
             {
                 Id = bikeTypeModel.Id,
                 Price = bikeTypeModel.Price,
-                Type = (Entities.Types)bikeTypeModel.Type
+                Type = (Types)bikeTypeModel.Type
             };
         }
 
