@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GetYoBike.Server.Controllers
 {
+
+    //System.InvalidOperationException: No route matches the supplied values.
     [Route("api/[controller]")]
     [ApiController]
     public class RentsController : ControllerBase
@@ -171,15 +173,23 @@ namespace GetYoBike.Server.Controllers
         }
 
         // GET: api/Rents/date?=2011-08-12T20:17:46.384Z (or just date)
-        [HttpGet("date")]
-        public async Task<ActionResult<List<Rent>>> GetAvailableRents([BindRequired] string dateTimeStr, [BindRequired] decimal duration)
+        [HttpGet("availableRentsInInterval")]
+        public async Task<ActionResult<List<Rent>>> GetAvailableRents([BindRequired] string dateTime, [BindRequired] decimal duration)
         {
-            DateTime dateTime;
-            //returns bool
-            DateTime.TryParse(dateTimeStr, out dateTime);
+            DateTime dateTimeFormatted;
+            List<Rent> availableRents = new List<Rent>();
+
+            if (DateTime.TryParse(dateTime, out dateTimeFormatted))
+            {
+                availableRents = _context.Rents.Where(r => r.RentStartDate.AddHours(r.RentHoursDuration) < dateTimeFormatted || r.RentStartDate > dateTimeFormatted.AddHours((double)duration)).ToList();
+            }
+            else
+            {
+                throw new ArgumentException("Invalid date");
+            }
 
             //Console.WriteLine($"Setialized to universal format{dateTime.ToString("yyyy-MM-dd'T'HH:mm:ssZ")}"); 
-            return NotFound();
+            return availableRents;
             //get list of bikes that are not rented in specified interval
             //return NotFound();
         }
