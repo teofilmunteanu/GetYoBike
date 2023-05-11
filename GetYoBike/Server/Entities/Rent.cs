@@ -11,6 +11,8 @@ namespace GetYoBike.Server.Entities
         public int RentedBikeId { get; set; }
         public Bike RentedBike { get; set; }
 
+        public decimal Price { get; set; } 
+        public bool IsDiscounted { get; set; }
 
         public DateTime RentStartDate { get; set; }
         public int RentHoursDuration { get; set; }

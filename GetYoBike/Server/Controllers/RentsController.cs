@@ -177,17 +177,15 @@ namespace GetYoBike.Server.Controllers
             return (_context.Rents?.Any(e => e.RenterUserId == id)).GetValueOrDefault();
         }
 
-        [HttpGet("checkDiscount/{id}")]
-        public async Task<bool> DiscountValidater(int id) //await se foloseste inside a non-async method
+        private void DiscountApplier(Rent rent) //await se foloseste inside a non-async method
         {
-            var rent = await _context.Rents.FindAsync(id);
-            if (rent == null)
-                return false;
-            return true;
+            if (rent.RentHoursDuration > 4)
+            { 
+                //aplic discount
+            }
         }
 
-        [HttpGet("checkCardNr")]
-        public bool ValidateCardNumber(string cardNumber)
+        private bool ValidateCardNumber(string cardNumber)
         {
             //nr cardului e intre 13 si 16 cifre (1)
             if (cardNumber.Length < 13 || cardNumber.Length > 16)
@@ -203,8 +201,7 @@ namespace GetYoBike.Server.Controllers
             return true;
         }
 
-        [HttpGet("checkCardDate")]
-        public bool ValidateCardDate(string cardDate)
+        private bool ValidateCardDate(string cardDate)
         {
             //fac parse la card date string si l transform intr-un obiect de tipul DateTime 
             DateTime expirationDate;
@@ -220,8 +217,7 @@ namespace GetYoBike.Server.Controllers
             return true;
         }
 
-        [HttpGet("checkCardName")]
-        public bool ValidateCardholderName(string cardName)
+       private bool ValidateCardholderName(string cardName)
         {
             //verific daca numele e empty sau nu
             if (string.IsNullOrWhiteSpace(cardName))
@@ -244,8 +240,7 @@ namespace GetYoBike.Server.Controllers
             return true;
         }
 
-        [HttpGet("checkCVC")]
-        public bool ValidateCVC(string CVC)
+        private bool ValidateCVC(string CVC)
         {
             //verific daca CVC-ul e null
             if (string.IsNullOrWhiteSpace(CVC))
