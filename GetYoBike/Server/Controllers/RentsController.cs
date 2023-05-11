@@ -187,16 +187,6 @@ namespace GetYoBike.Server.Controllers
             }
         }
 
-        [HttpGet("checkDiscount")]
-        public bool DiscountApply(Rent rent)
-        {
-            if (rent.IsDiscounted==true)
-            { 
-                return true; 
-            }
-            return false ;
-        }
-
         private bool ValidateCardNumber(string cardNumber)
         {
             //nr cardului e intre 13 si 16 cifre (1)
