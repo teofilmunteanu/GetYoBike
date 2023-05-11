@@ -2,7 +2,6 @@
 using GetYoBike.Server.Entities;
 using GetYoBike.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace GetYoBike.Server.Controllers
@@ -170,37 +169,6 @@ namespace GetYoBike.Server.Controllers
         private bool RentExists(int userId, int bikeId)
         {
             return (_context.Rents?.Any(e => e.UserID == userId && e.BikeID == bikeId)).GetValueOrDefault();
-        }
-
-        //get list of bikes that are not rented in specified interval
-        // GET: api/Rents/date?=2011-08-12T20:17:46.384Z (or just date)
-        [HttpGet("availableBikesInInterval")]
-        public async Task<ActionResult<List<Bike>>> GetAvailableRents([BindRequired] string dateTime, [BindRequired] decimal duration)
-        {
-            DateTime dateTimeFormatted;
-            List<Rent> rentsInInterval = new List<Rent>();
-            List<Bike> availableBikes = new List<Bike>();
-
-            if (DateTime.TryParse(dateTime, out dateTimeFormatted))
-            {
-                rentsInInterval = _context.Rents.Where(r => r.RentStartDate.AddHours(r.RentHoursDuration) > dateTimeFormatted && r.RentStartDate < dateTimeFormatted.AddHours((double)duration)).ToList();
-                //verifica daca vreunul din renturi contine bike-ul acesta
-                List<Bike> unavailableBikes = new List<Bike>();
-                rentsInInterval.ForEach(r => unavailableBikes.Add(r.RentedBike));
-
-                availableBikes = _context.Bikes.Where(b => !(unavailableBikes.Contains(b))).ToList();
-            }
-            else
-            {
-                throw new ArgumentException("Invalid date");
-            }
-
-            if (availableBikes == null)
-            {
-                return NotFound();
-            }
-            //Console.WriteLine($"Setialized to universal format{dateTime.ToString("yyyy-MM-dd'T'HH:mm:ssZ")}"); 
-            return availableBikes;
         }
 
         [HttpGet("checkDiscount/{id}")]
