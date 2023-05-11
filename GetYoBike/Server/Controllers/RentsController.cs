@@ -179,7 +179,7 @@ namespace GetYoBike.Server.Controllers
 
         private void DiscountApplier(Rent rent) //await se foloseste inside a non-async method
         {
-            if (rent.RentHoursDuration > 4)
+            if (rent.RentHoursDuration > 4 && !rent.IsDiscounted)
             {
                 rent.Price = rent.Price * 0.85m;
                 //aplic discount-ul de 15%, 100-15=85
