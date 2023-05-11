@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GetYoBike.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230511110409_init")]
-    partial class init
+    [Migration("20230511165332_init3")]
+    partial class init3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,10 +55,8 @@ namespace GetYoBike.Server.Migrations
 
             modelBuilder.Entity("GetYoBike.Server.Entities.Rent", b =>
                 {
-                    b.Property<int>("RenterUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RentedBikeId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("CardCVC")
@@ -87,9 +85,17 @@ namespace GetYoBike.Server.Migrations
                     b.Property<DateTime>("RentStartDate")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("RenterUserId", "RentedBikeId");
+                    b.Property<int>("RentedBikeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RenterUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("RentedBikeId");
+
+                    b.HasIndex("RenterUserId");
 
                     b.ToTable("Rents");
                 });

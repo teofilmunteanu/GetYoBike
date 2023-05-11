@@ -2,6 +2,7 @@
 {
     public class RentModel
     {
+        public int Id { get; set; }
         public int UserID { get; set; }
         public int BikeID { get; set; }
         public DateTime RentStartDate { get; set; }

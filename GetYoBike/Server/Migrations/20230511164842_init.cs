@@ -66,6 +66,7 @@ namespace GetYoBike.Server.Migrations
                 {
                     RenterUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     RentedBikeId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false),
                     RentStartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     RentHoursDuration = table.Column<int>(type: "INTEGER", nullable: false),
                     CardNr = table.Column<string>(type: "TEXT", nullable: false),

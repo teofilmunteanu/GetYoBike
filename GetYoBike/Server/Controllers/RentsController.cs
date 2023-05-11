@@ -21,6 +21,7 @@ namespace GetYoBike.Server.Controllers
 
         private Rent? ModelToEntity(RentModel bikeTypeModel)
         {
+            // Pun eu rentedUser si rentedBike sau se pune singure din DbContext?? NU TB SA SE PUNA IN DB
             //User? renterUser = _context.Users.Find(bikeTypeModel.UserID);
             //Bike? rentedBike = _context.Bikes.Find(bikeTypeModel.BikeID);
 
@@ -32,6 +33,7 @@ namespace GetYoBike.Server.Controllers
 
             return new Rent()
             {
+                Id = bikeTypeModel.Id,
                 RenterUserId = bikeTypeModel.UserID,
                 RentedBikeId = bikeTypeModel.BikeID,
                 RentStartDate = bikeTypeModel.RentStartDate,
@@ -58,14 +60,14 @@ namespace GetYoBike.Server.Controllers
         }
 
         // GET: api/Rents/5
-        [HttpGet("{userId}/{bikeId}")]
-        public async Task<ActionResult<Rent>> GetRent(int userId, int bikeId)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Rent>> GetRent(int id)
         {
             if (_context.Rents == null)
             {
                 return NotFound();
             }
-            var rent = await _context.Rents.FindAsync(userId, bikeId);
+            var rent = await _context.Rents.FindAsync(id);
 
             if (rent == null)
             {
@@ -77,13 +79,13 @@ namespace GetYoBike.Server.Controllers
 
         // PUT: api/Rents/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{userId}/{bikeId}")]
+        [HttpPut("{id}")]
         //functiile put sunt cele care dau UPDATE la ceva din DB
-        public async Task<IActionResult> PutRent(int userId, int bikeId, RentModel rentModel)
+        public async Task<IActionResult> PutRent(int id, RentModel rentModel)
         {
             Rent? rent = ModelToEntity(rentModel);
 
-            if (rent == null || userId != rent.RenterUserId || bikeId != rent.RentedBikeId)
+            if (rent == null || id != rent.Id)
             {
                 return BadRequest();
             }
@@ -96,7 +98,7 @@ namespace GetYoBike.Server.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!RentExists(userId, bikeId))
+                if (!RentExists(id))
                 {
                     return NotFound();
                 }
@@ -136,7 +138,7 @@ namespace GetYoBike.Server.Controllers
             }
             catch (DbUpdateException)
             {
-                if (RentExists(rent.RenterUserId, rent.RentedBikeId))
+                if (RentExists(rent.Id))
                 {
                     return Conflict();
                 }
@@ -150,14 +152,14 @@ namespace GetYoBike.Server.Controllers
         }
 
         // DELETE: api/Rents/5
-        [HttpDelete("{userId}/{bikeId}")]
-        public async Task<IActionResult> DeleteRent(int userId, int bikeId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRent(int id)
         {
             if (_context.Rents == null)
             {
                 return NotFound();
             }
-            var rent = await _context.Rents.FindAsync(userId, bikeId);
+            var rent = await _context.Rents.FindAsync(id);
             if (rent == null)
             {
                 return NotFound();
@@ -169,12 +171,12 @@ namespace GetYoBike.Server.Controllers
             return NoContent();
         }
 
-        private bool RentExists(int userId, int bikeId)
+        private bool RentExists(int id)
         {
-            return (_context.Rents?.Any(e => e.RenterUserId == userId && e.RentedBikeId == bikeId)).GetValueOrDefault();
+            return (_context.Rents?.Any(e => e.RenterUserId == id)).GetValueOrDefault();
         }
 
-        [HttpGet("checkDiscount/{userId}/{bikeId}")]
+        [HttpGet("checkDiscount/{id}")]
         public async Task<bool> DiscountValidater(int id) //await se foloseste inside a non-async method
         {
             var rent = await _context.Rents.FindAsync(id);

@@ -2,9 +2,9 @@
 
 namespace GetYoBike.Server.Entities
 {
-    [PrimaryKey(nameof(RenterUserId), nameof(RentedBikeId))]
     public class Rent
     {
+        public int Id { get; set; }
         public int RenterUserId { get; set; }
         public User RenterUser { get; set; }
 
