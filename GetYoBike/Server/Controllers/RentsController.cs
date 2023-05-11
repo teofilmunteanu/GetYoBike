@@ -3,6 +3,7 @@ using GetYoBike.Server.Entities;
 using GetYoBike.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -182,6 +183,90 @@ namespace GetYoBike.Server.Controllers
             var rent = await _context.Rents.FindAsync(id);
             if (rent == null)
                 return false;
+            return true;
+        }
+
+        [HttpGet("checkCardNr")]
+        public bool ValidateCardNumber(string cardNumber)
+        {
+            //nr cardului e intre 13 si 16 cifre (1)
+            if (cardNumber.Length < 13 || cardNumber.Length > 16)
+            {
+                return false;
+            }
+            // caracterul c(adica nr meu din card) este chiar o cifra, verific daca are caractere speciale in acele cifre
+            foreach (char c in cardNumber)
+            {
+                if (!char.IsDigit(c))
+                    return false;
+            }
+            return true;
+        }
+
+        [HttpGet("checkCardDate")]
+        public bool ValidateCardDate(string cardDate)
+        {
+            //fac parse la card date string si l transform intr-un obiect de tipul DateTime 
+            DateTime expirationDate;
+            if (!DateTime.TryParseExact(cardDate, "MM/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out expirationDate))
+                return false;
+            // aflu data curenta in care ne aflam
+            DateTime currentDate = DateTime.Now;
+            // compar datile
+            if (expirationDate < currentDate)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        [HttpGet("checkCardName")]
+        public bool ValidateCardholderName(string cardName)
+        {
+            //verific daca numele e empty sau nu
+            if (string.IsNullOrWhiteSpace(cardName))
+            {
+                return false;
+            }
+            // verific daca numele contine caractere speciale
+            foreach (char c in cardName)
+            {
+                if (!char.IsLetter(c) && c != ' ' && c != '-')
+                {
+                    return false;
+                }
+            }
+            // !!maximul de caractere acceptate este 25!!
+            if (cardName.Length > 26)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        [HttpGet("checkCVC")]
+        public bool ValidateCVC(string CVC)
+        {
+            //verific daca CVC-ul e null
+            if (string.IsNullOrWhiteSpace(CVC))
+            {
+                return false;
+            }
+
+            // verific daca CVC-ul e facut doar din numere
+            foreach (char c in CVC)
+            {
+                if (!char.IsDigit(c))
+                {
+                    return false;
+                }
+            }
+
+            //aparent, CVC-ul poate fi de lungime 3 sau 4
+            if (CVC.Length < 3 || CVC.Length > 4)
+            {
+                return false;
+            }
             return true;
         }
 
