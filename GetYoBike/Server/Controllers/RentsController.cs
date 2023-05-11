@@ -32,17 +32,15 @@ namespace GetYoBike.Server.Controllers
 
             return new Rent()
             {
-                UserID = bikeTypeModel.UserID,
-                BikeID = bikeTypeModel.BikeID,
+                RenterUserId = bikeTypeModel.UserID,
+                RentedBikeId = bikeTypeModel.BikeID,
                 RentStartDate = bikeTypeModel.RentStartDate,
                 RentHoursDuration = bikeTypeModel.RentHoursDuration,
                 CardNr = bikeTypeModel.CardNr,
                 CardExpMonth = bikeTypeModel.CardExpMonth,
                 CardExpYear = bikeTypeModel.CardExpYear,
                 CardCVC = bikeTypeModel.CardCVC,
-                PublicId = bikeTypeModel.PublicId,
-                RenterUserId = bikeTypeModel.UserID,
-                RentedBikeId = bikeTypeModel.BikeID
+                PublicId = bikeTypeModel.PublicId
                 //RenterUser = renterUser,
                 //RentedBike = rentedBike
             };
@@ -85,7 +83,7 @@ namespace GetYoBike.Server.Controllers
         {
             Rent? rent = ModelToEntity(rentModel);
 
-            if (rent == null || userId != rent.UserID || bikeId != rent.BikeID)
+            if (rent == null || userId != rent.RenterUserId || bikeId != rent.RentedBikeId)
             {
                 return BadRequest();
             }
@@ -138,7 +136,7 @@ namespace GetYoBike.Server.Controllers
             }
             catch (DbUpdateException)
             {
-                if (RentExists(rent.UserID, rent.BikeID))
+                if (RentExists(rent.RenterUserId, rent.RentedBikeId))
                 {
                     return Conflict();
                 }
@@ -148,7 +146,7 @@ namespace GetYoBike.Server.Controllers
                 }
             }
 
-            return CreatedAtAction("GetRent", new { id = rent.UserID }, rent);
+            return CreatedAtAction("GetRent", new { id = rent.RenterUserId }, rent);
         }
 
         // DELETE: api/Rents/5
@@ -173,7 +171,7 @@ namespace GetYoBike.Server.Controllers
 
         private bool RentExists(int userId, int bikeId)
         {
-            return (_context.Rents?.Any(e => e.UserID == userId && e.BikeID == bikeId)).GetValueOrDefault();
+            return (_context.Rents?.Any(e => e.RenterUserId == userId && e.RentedBikeId == bikeId)).GetValueOrDefault();
         }
 
         [HttpGet("checkDiscount/{userId}/{bikeId}")]

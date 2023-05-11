@@ -2,11 +2,16 @@
 
 namespace GetYoBike.Server.Entities
 {
-    [PrimaryKey(nameof(UserID), nameof(BikeID))]
+    [PrimaryKey(nameof(RenterUserId), nameof(RentedBikeId))]
     public class Rent
     {
-        public int UserID { get; set; }
-        public int BikeID { get; set; }
+        public int RenterUserId { get; set; }
+        public User RenterUser { get; set; }
+
+        public int RentedBikeId { get; set; }
+        public Bike RentedBike { get; set; }
+
+
         public DateTime RentStartDate { get; set; }
         public int RentHoursDuration { get; set; }
 
@@ -17,11 +22,5 @@ namespace GetYoBike.Server.Entities
 
         public string PublicId { get; set; }
 
-        //do I need RentedBikeId and RenterUserId if I got BikeId and UserId above?(those are PKs, these should be FKs)
-        public int RentedBikeId { get; set; }
-        public Bike RentedBike { get; set; }
-
-        public int RenterUserId { get; set; }
-        public User RenterUser { get; set; }
     }
 }

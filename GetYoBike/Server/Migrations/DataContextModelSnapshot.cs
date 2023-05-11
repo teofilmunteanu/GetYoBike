@@ -52,10 +52,10 @@ namespace GetYoBike.Server.Migrations
 
             modelBuilder.Entity("GetYoBike.Server.Entities.Rent", b =>
                 {
-                    b.Property<int>("UserID")
+                    b.Property<int>("RenterUserId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BikeID")
+                    b.Property<int>("RentedBikeId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("CardCVC")
@@ -84,17 +84,9 @@ namespace GetYoBike.Server.Migrations
                     b.Property<DateTime>("RentStartDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("RentedBikeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RenterUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("UserID", "BikeID");
+                    b.HasKey("RenterUserId", "RentedBikeId");
 
                     b.HasIndex("RentedBikeId");
-
-                    b.HasIndex("RenterUserId");
 
                     b.ToTable("Rents");
                 });

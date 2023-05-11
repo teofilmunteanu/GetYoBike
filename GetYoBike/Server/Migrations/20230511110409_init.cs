@@ -64,21 +64,19 @@ namespace GetYoBike.Server.Migrations
                 name: "Rents",
                 columns: table => new
                 {
-                    UserID = table.Column<int>(type: "INTEGER", nullable: false),
-                    BikeID = table.Column<int>(type: "INTEGER", nullable: false),
+                    RenterUserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    RentedBikeId = table.Column<int>(type: "INTEGER", nullable: false),
                     RentStartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     RentHoursDuration = table.Column<int>(type: "INTEGER", nullable: false),
                     CardNr = table.Column<string>(type: "TEXT", nullable: false),
                     CardExpMonth = table.Column<string>(type: "TEXT", nullable: false),
                     CardExpYear = table.Column<string>(type: "TEXT", nullable: false),
                     CardCVC = table.Column<string>(type: "TEXT", nullable: false),
-                    PublicId = table.Column<string>(type: "TEXT", nullable: false),
-                    RentedBikeId = table.Column<int>(type: "INTEGER", nullable: false),
-                    RenterUserId = table.Column<int>(type: "INTEGER", nullable: false)
+                    PublicId = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Rents", x => new { x.UserID, x.BikeID });
+                    table.PrimaryKey("PK_Rents", x => new { x.RenterUserId, x.RentedBikeId });
                     table.ForeignKey(
                         name: "FK_Rents_Bikes_RentedBikeId",
                         column: x => x.RentedBikeId,
@@ -102,11 +100,6 @@ namespace GetYoBike.Server.Migrations
                 name: "IX_Rents_RentedBikeId",
                 table: "Rents",
                 column: "RentedBikeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Rents_RenterUserId",
-                table: "Rents",
-                column: "RenterUserId");
         }
 
         /// <inheritdoc />
