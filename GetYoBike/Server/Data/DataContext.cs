@@ -20,9 +20,9 @@ namespace GetYoBike.Server.Data
         {
             modelBuilder.Entity<Rent>().HasKey(r => new { r.UserID, r.BikeID });
 
-            modelBuilder.Entity<Bike>().HasMany(b => b.Rents).WithOne(r => r.RentedBike);
-            modelBuilder.Entity<User>().HasMany(b => b.Rents).WithOne(u => u.RenterUser);
-            modelBuilder.Entity<BikeType>().HasMany(r => r.Bikes).WithOne(b => b.Type);
+            modelBuilder.Entity<Bike>().HasMany(b => b.Rents).WithOne(r => r.RentedBike).OnDelete(DeleteBehavior.Cascade); ;
+            modelBuilder.Entity<User>().HasMany(b => b.Rents).WithOne(u => u.RenterUser).OnDelete(DeleteBehavior.Cascade); ;
+            modelBuilder.Entity<BikeType>().HasMany(r => r.Bikes).WithOne(b => b.Type).OnDelete(DeleteBehavior.Cascade); ;
         }
 
     }

@@ -17,7 +17,11 @@ namespace GetYoBike.Server.Entities
 
         public string PublicId { get; set; }
 
+        //do I need RentedBikeId and RenterUserId if I got BikeId and UserId above?(those are PKs, these should be FKs)
+        public int RentedBikeId { get; set; }
         public Bike RentedBike { get; set; }
+
+        public int RenterUserId { get; set; }
         public User RenterUser { get; set; }
     }
 }

@@ -20,17 +20,18 @@ namespace GetYoBike.Server.Controllers
 
         private Bike? ModelToEntity(BikeModel bikeModel)
         {
-            BikeType? bikeType = _context.BikeTypes.Find(bikeModel.TypeId); //_context.BikeTypes.FirstOrDefault(b => b.Type == (Types)bikeModel.TypeId);
-            if (bikeType == null)
-            {
-                return null;
-            }
+            //BikeType? bikeType = _context.BikeTypes.Find(bikeModel.TypeId); //_context.BikeTypes.FirstOrDefault(b => b.Type == (Types)bikeModel.TypeId);
+            //if (bikeType == null)
+            //{
+            //    return null;
+            //}
             //eventually throw exception to be catched below(PUT/POST) and return bad request with exception error msg
 
             return new Bike()
             {
                 Id = bikeModel.Id,
-                Type = bikeType
+                TypeId = bikeModel.TypeId
+                //Type = bikeType
             };
         }
 

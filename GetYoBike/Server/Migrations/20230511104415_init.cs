@@ -72,20 +72,22 @@ namespace GetYoBike.Server.Migrations
                     CardExpMonth = table.Column<string>(type: "TEXT", nullable: false),
                     CardExpYear = table.Column<string>(type: "TEXT", nullable: false),
                     CardCVC = table.Column<string>(type: "TEXT", nullable: false),
-                    PublicId = table.Column<string>(type: "TEXT", nullable: false)
+                    PublicId = table.Column<string>(type: "TEXT", nullable: false),
+                    RentedBikeId = table.Column<int>(type: "INTEGER", nullable: false),
+                    RenterUserId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Rents", x => new { x.UserID, x.BikeID });
                     table.ForeignKey(
-                        name: "FK_Rents_Bikes_BikeID",
-                        column: x => x.BikeID,
+                        name: "FK_Rents_Bikes_RentedBikeId",
+                        column: x => x.RentedBikeId,
                         principalTable: "Bikes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Rents_Users_UserID",
-                        column: x => x.UserID,
+                        name: "FK_Rents_Users_RenterUserId",
+                        column: x => x.RenterUserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -97,9 +99,14 @@ namespace GetYoBike.Server.Migrations
                 column: "TypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rents_BikeID",
+                name: "IX_Rents_RentedBikeId",
                 table: "Rents",
-                column: "BikeID");
+                column: "RentedBikeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rents_RenterUserId",
+                table: "Rents",
+                column: "RenterUserId");
         }
 
         /// <inheritdoc />

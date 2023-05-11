@@ -21,14 +21,14 @@ namespace GetYoBike.Server.Controllers
 
         private Rent? ModelToEntity(RentModel bikeTypeModel)
         {
-            User? renterUser = _context.Users.Find(bikeTypeModel.UserID);
-            Bike? rentedBike = _context.Bikes.Find(bikeTypeModel.BikeID);
+            //User? renterUser = _context.Users.Find(bikeTypeModel.UserID);
+            //Bike? rentedBike = _context.Bikes.Find(bikeTypeModel.BikeID);
 
-            if (renterUser == null || rentedBike == null)
-            {
-                return null;
-            }
-            //eventually throw exception to be catched below(PUT/POST) and return bad request with exception error msg
+            //if (renterUser == null || rentedBike == null)
+            //{
+            //    return null;
+            //}
+            //eventually throw exception to be caught below(PUT/POST) and return bad request with exception error msg
 
             return new Rent()
             {
@@ -41,8 +41,10 @@ namespace GetYoBike.Server.Controllers
                 CardExpYear = bikeTypeModel.CardExpYear,
                 CardCVC = bikeTypeModel.CardCVC,
                 PublicId = bikeTypeModel.PublicId,
-                RenterUser = renterUser,
-                RentedBike = rentedBike
+                RenterUserId = bikeTypeModel.UserID,
+                RentedBikeId = bikeTypeModel.BikeID
+                //RenterUser = renterUser,
+                //RentedBike = rentedBike
             };
         }
 
@@ -58,7 +60,7 @@ namespace GetYoBike.Server.Controllers
         }
 
         // GET: api/Rents/5
-        [HttpGet("{bikeId}/{userId}")]
+        [HttpGet("{userId}/{bikeId}")]
         public async Task<ActionResult<Rent>> GetRent(int userId, int bikeId)
         {
             if (_context.Rents == null)
@@ -77,7 +79,7 @@ namespace GetYoBike.Server.Controllers
 
         // PUT: api/Rents/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{bikeId}/{userId}")]
+        [HttpPut("{userId}/{bikeId}")]
         //functiile put sunt cele care dau UPDATE la ceva din DB
         public async Task<IActionResult> PutRent(int userId, int bikeId, RentModel rentModel)
         {
@@ -108,6 +110,9 @@ namespace GetYoBike.Server.Controllers
 
             return NoContent();
         }
+
+
+        //Error in API: No route matches the supplied values.
 
         // POST: api/Rents
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -147,7 +152,7 @@ namespace GetYoBike.Server.Controllers
         }
 
         // DELETE: api/Rents/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{userId}/{bikeId}")]
         public async Task<IActionResult> DeleteRent(int userId, int bikeId)
         {
             if (_context.Rents == null)
@@ -171,7 +176,7 @@ namespace GetYoBike.Server.Controllers
             return (_context.Rents?.Any(e => e.UserID == userId && e.BikeID == bikeId)).GetValueOrDefault();
         }
 
-        [HttpGet("checkDiscount/{id}")]
+        [HttpGet("checkDiscount/{userId}/{bikeId}")]
         public async Task<bool> DiscountValidater(int id) //await se foloseste inside a non-async method
         {
             var rent = await _context.Rents.FindAsync(id);

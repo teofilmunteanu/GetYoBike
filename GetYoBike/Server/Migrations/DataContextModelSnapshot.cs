@@ -84,9 +84,17 @@ namespace GetYoBike.Server.Migrations
                     b.Property<DateTime>("RentStartDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("RentedBikeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RenterUserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("UserID", "BikeID");
 
-                    b.HasIndex("BikeID");
+                    b.HasIndex("RentedBikeId");
+
+                    b.HasIndex("RenterUserId");
 
                     b.ToTable("Rents");
                 });
@@ -132,13 +140,13 @@ namespace GetYoBike.Server.Migrations
                 {
                     b.HasOne("GetYoBike.Server.Entities.Bike", "RentedBike")
                         .WithMany("Rents")
-                        .HasForeignKey("BikeID")
+                        .HasForeignKey("RentedBikeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GetYoBike.Server.Entities.User", "RenterUser")
                         .WithMany("Rents")
-                        .HasForeignKey("UserID")
+                        .HasForeignKey("RenterUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
