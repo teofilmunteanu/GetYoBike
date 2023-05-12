@@ -40,9 +40,10 @@ namespace GetYoBike.Server.Controllers
                 RentStartDate = bikeTypeModel.RentStartDate,
                 RentHoursDuration = bikeTypeModel.RentHoursDuration,
                 CardNr = bikeTypeModel.CardNr,
+                CardCVC = bikeTypeModel.CardCVC,
                 CardExpMonth = bikeTypeModel.CardExpMonth,
                 CardExpYear = bikeTypeModel.CardExpYear,
-                CardCVC = bikeTypeModel.CardCVC,
+                CardHolderName = bikeTypeModel.CardHolderName,
                 PublicId = bikeTypeModel.PublicId
                 //RenterUser = renterUser,
                 //RentedBike = rentedBike
@@ -219,7 +220,7 @@ namespace GetYoBike.Server.Controllers
             return true;
         }
 
-       private bool ValidateCardholderName(string cardName)
+        private bool ValidateCardholderName(string cardName)
         {
             //verific daca numele e empty sau nu
             if (string.IsNullOrWhiteSpace(cardName))
@@ -271,12 +272,12 @@ namespace GetYoBike.Server.Controllers
         {
             DateTime currentDate = DateTime.Now;
             if (rent.RentStartDate < currentDate)
-            { 
-                return true; 
+            {
+                return true;
             }
             else
-            { 
-                return false; 
+            {
+                return false;
             }
         }
 
@@ -289,7 +290,7 @@ namespace GetYoBike.Server.Controllers
             {
                 return NotFound();
             }
-            if(!DateCheck(rent))
+            if (!DateCheck(rent))
             {
                 ToUpdateRent.RentStartDate = rent.RentStartDate;
                 await _context.SaveChangesAsync();

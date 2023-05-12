@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace GetYoBike.Server.Entities
+﻿namespace GetYoBike.Server.Entities
 {
     public class Rent
     {
@@ -11,16 +9,17 @@ namespace GetYoBike.Server.Entities
         public int RentedBikeId { get; set; }
         public Bike RentedBike { get; set; }
 
-        public decimal Price { get; set; } 
+        public decimal Price { get; set; }
         public bool IsDiscounted { get; set; }
 
         public DateTime RentStartDate { get; set; }
         public int RentHoursDuration { get; set; }
 
         public string CardNr { get; set; }
+        public string CardCVC { get; set; }
         public string CardExpMonth { get; set; }
         public string CardExpYear { get; set; }
-        public string CardCVC { get; set; }
+        public string CardHolderName { get; set; }
 
         public string PublicId { get; set; }
 
