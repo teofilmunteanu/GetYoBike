@@ -267,6 +267,38 @@ namespace GetYoBike.Server.Controllers
             return true;
         }
 
+        private bool DateCheck(Rent rent)
+        {
+            DateTime currentDate = DateTime.Now;
+            if (rent.RentStartDate < currentDate)
+            { 
+                return true; 
+            }
+            else
+            { 
+                return false; 
+            }
+        }
+
+        [HttpPut("ChangeDate{'id'}")]
+        public async Task<IActionResult> ChangeDate(int id, Rent rent)
+        {
+            //modific data, nu userii, deci inlocuiesc cu rents si lucrez pe rents
+            var ToUpdateRent = await _context.Rents.FindAsync(id);
+            if (ToUpdateRent == null)
+            {
+                return NotFound();
+            }
+            if(!DateCheck(rent))
+            {
+                ToUpdateRent.RentStartDate = rent.RentStartDate;
+                await _context.SaveChangesAsync();
+                return Ok(ToUpdateRent);
+            }
+
+            return BadRequest("Invalid rent start date.");
+        }
+
     }
 
 }
