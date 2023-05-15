@@ -30,7 +30,7 @@ namespace GetYoBike.Server.Migrations
 
                     b.HasIndex("TypeId");
 
-                    b.ToTable("Bikes");
+                    b.ToTable("Bikes", (string)null);
                 });
 
             modelBuilder.Entity("GetYoBike.Server.Entities.BikeType", b =>
@@ -47,7 +47,7 @@ namespace GetYoBike.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BikeTypes");
+                    b.ToTable("BikeTypes", (string)null);
                 });
 
             modelBuilder.Entity("GetYoBike.Server.Entities.Rent", b =>
@@ -104,7 +104,7 @@ namespace GetYoBike.Server.Migrations
 
                     b.HasIndex("RenterUserId");
 
-                    b.ToTable("Rents");
+                    b.ToTable("Rents", (string)null);
                 });
 
             modelBuilder.Entity("GetYoBike.Server.Entities.User", b =>
@@ -130,7 +130,7 @@ namespace GetYoBike.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("GetYoBike.Server.Entities.Bike", b =>
