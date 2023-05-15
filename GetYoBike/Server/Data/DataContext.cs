@@ -18,14 +18,9 @@ namespace GetYoBike.Server.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Bike>().HasMany(b => b.Rents).WithOne(r => r.RentedBike).OnDelete(DeleteBehavior.Cascade); ;
-            modelBuilder.Entity<User>().HasMany(b => b.Rents).WithOne(u => u.RenterUser).OnDelete(DeleteBehavior.Cascade); ;
-            modelBuilder.Entity<BikeType>().HasMany(r => r.Bikes).WithOne(b => b.Type).OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Bike>().Navigation(e => e.Type).AutoInclude();
-            modelBuilder.Entity<Rent>().Navigation(e => e.RentedBike).AutoInclude();
-            modelBuilder.Entity<Rent>().Navigation(e => e.RenterUser).AutoInclude();
+            modelBuilder.Entity<Bike>().HasMany(b => b.Rents).WithOne(r => r.RentedBike).HasForeignKey(r => r.RentedBikeId);
+            modelBuilder.Entity<User>().HasMany(b => b.Rents).WithOne(u => u.RenterUser).HasForeignKey(u => u.RenterUserId);
+            modelBuilder.Entity<BikeType>().HasMany(t => t.Bikes).WithOne(b => b.Type).HasForeignKey(t => t.TypeId);
         }
-
     }
 }

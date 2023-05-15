@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GetYoBike.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230511182611_PriceFields")]
-    partial class PriceFields
+    [Migration("20230514012228_init2")]
+    partial class init2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,6 +68,10 @@ namespace GetYoBike.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CardExpYear")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CardHolderName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

@@ -64,20 +64,24 @@ namespace GetYoBike.Server.Migrations
                 name: "Rents",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     RenterUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     RentedBikeId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Id = table.Column<int>(type: "INTEGER", nullable: false),
+                    Price = table.Column<decimal>(type: "TEXT", nullable: false),
+                    IsDiscounted = table.Column<bool>(type: "INTEGER", nullable: false),
                     RentStartDate = table.Column<DateTime>(type: "TEXT", nullable: false),
                     RentHoursDuration = table.Column<int>(type: "INTEGER", nullable: false),
                     CardNr = table.Column<string>(type: "TEXT", nullable: false),
+                    CardCVC = table.Column<string>(type: "TEXT", nullable: false),
                     CardExpMonth = table.Column<string>(type: "TEXT", nullable: false),
                     CardExpYear = table.Column<string>(type: "TEXT", nullable: false),
-                    CardCVC = table.Column<string>(type: "TEXT", nullable: false),
+                    CardHolderName = table.Column<string>(type: "TEXT", nullable: false),
                     PublicId = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Rents", x => new { x.RenterUserId, x.RentedBikeId });
+                    table.PrimaryKey("PK_Rents", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Rents_Bikes_RentedBikeId",
                         column: x => x.RentedBikeId,
@@ -101,6 +105,11 @@ namespace GetYoBike.Server.Migrations
                 name: "IX_Rents_RentedBikeId",
                 table: "Rents",
                 column: "RentedBikeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rents_RenterUserId",
+                table: "Rents",
+                column: "RenterUserId");
         }
 
         /// <inheritdoc />

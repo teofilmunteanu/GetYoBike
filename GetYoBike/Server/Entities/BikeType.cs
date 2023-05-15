@@ -11,6 +11,6 @@
         public int Id { get; set; }
         public decimal Price { get; set; }
         public Types Type { get; set; }
-        public List<Bike> Bikes { get; set; }
+        public ICollection<Bike>? Bikes { get; set; }
     }
 }

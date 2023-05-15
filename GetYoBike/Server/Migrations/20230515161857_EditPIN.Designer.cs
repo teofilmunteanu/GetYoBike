@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GetYoBike.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230511165332_init3")]
-    partial class init3
+    [Migration("20230515161857_EditPIN")]
+    partial class EditPIN
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,12 +71,22 @@ namespace GetYoBike.Server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CardHolderName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CardNr")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PublicId")
+                    b.Property<string>("EditPIN")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDiscounted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("RentHoursDuration")

@@ -29,33 +29,48 @@ namespace GetYoBike.Server.Controllers
             };
         }
 
+        private UserModel EntityToModel(User user)
+        {
+            return new UserModel()
+            {
+                Id = user.Id,
+                Email = user.Email,
+                LastName = user.LastName,
+                FirstName = user.FirstName,
+                Age = user.Age
+            };
+        }
+
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserModel>>> GetUsers()
         {
             if (_context.Users == null)
             {
                 return NotFound();
             }
-            return await _context.Users.ToListAsync();
+
+            List<User> users = await _context.Users.ToListAsync();
+
+            return Ok(users.Select(EntityToModel).ToList());
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserModel>> GetUser(int id)
         {
             if (_context.Users == null)
             {
                 return NotFound();
             }
-            var user = await _context.Users.FindAsync(id);
 
+            var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
 
-            return user;
+            return Ok(EntityToModel(user));
         }
 
         // PUT: api/Users/5
@@ -94,7 +109,7 @@ namespace GetYoBike.Server.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(UserModel userModel)
+        public async Task<ActionResult<UserModel>> PostUser(UserModel userModel)
         {
             User user = ModelToEntity(userModel);
 

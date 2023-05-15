@@ -27,33 +27,46 @@ namespace GetYoBike.Server.Controllers
             };
         }
 
+        private BikeTypeModel EntityToModel(BikeType bikeType)
+        {
+            return new BikeTypeModel()
+            {
+                Id = bikeType.Id,
+                Price = bikeType.Price,
+                Type = (TypesModel)bikeType.Type
+            };
+        }
+
         // GET: api/BikeTypes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BikeType>>> GetBikeTypes()
+        public async Task<ActionResult<IEnumerable<BikeTypeModel>>> GetBikeTypes()
         {
             if (_context.BikeTypes == null)
             {
                 return NotFound();
             }
-            return await _context.BikeTypes.ToListAsync();
+
+            List<BikeType> bikeTypes = await _context.BikeTypes.ToListAsync();
+
+            return Ok(bikeTypes.Select(EntityToModel).ToList());
         }
 
         // GET: api/BikeTypes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BikeType>> GetBikeType(int id)
+        public async Task<ActionResult<BikeTypeModel>> GetBikeType(int id)
         {
             if (_context.BikeTypes == null)
             {
                 return NotFound();
             }
-            var bikeType = await _context.BikeTypes.FindAsync(id);
 
+            var bikeType = await _context.BikeTypes.FindAsync(id);
             if (bikeType == null)
             {
                 return NotFound();
             }
 
-            return bikeType;
+            return Ok(EntityToModel(bikeType));
         }
 
         // PUT: api/BikeTypes/5
@@ -61,7 +74,6 @@ namespace GetYoBike.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBikeType(int id, BikeTypeModel bikeTypeModel)
         {
-
             BikeType bikeType = ModelToEntity(bikeTypeModel);
 
             if (id != bikeType.Id)
@@ -93,7 +105,7 @@ namespace GetYoBike.Server.Controllers
         // POST: api/BikeTypes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<BikeType>> PostBikeType(BikeTypeModel bikeTypeModel)
+        public async Task<ActionResult<BikeTypeModel>> PostBikeType(BikeTypeModel bikeTypeModel)
         {
             BikeType bikeType = ModelToEntity(bikeTypeModel);
 

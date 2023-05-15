@@ -20,7 +20,7 @@ namespace GetYoBike.Server.Controllers
             _context = context;
         }
 
-        private Rent? ModelToEntity(RentModel bikeTypeModel)
+        private Rent ModelToEntity(RentModel bikeTypeModel)
         {
             // Pun eu rentedUser si rentedBike sau se pune singure din DbContext?? NU TB SA SE PUNA IN DB
             //User? renterUser = _context.Users.Find(bikeTypeModel.UserID);
@@ -44,39 +44,60 @@ namespace GetYoBike.Server.Controllers
                 CardExpMonth = bikeTypeModel.CardExpMonth,
                 CardExpYear = bikeTypeModel.CardExpYear,
                 CardHolderName = bikeTypeModel.CardHolderName,
-                PublicId = bikeTypeModel.PublicId
+                EditPIN = bikeTypeModel.EditPIN
                 //RenterUser = renterUser,
                 //RentedBike = rentedBike
             };
         }
 
+        private RentModel EntityToModel(Rent rent)
+        {
+            return new RentModel()
+            {
+                Id = rent.Id,
+                UserID = rent.RenterUserId,
+                BikeID = rent.RentedBikeId,
+                RentStartDate = rent.RentStartDate,
+                RentHoursDuration = rent.RentHoursDuration,
+                CardNr = rent.CardNr,
+                CardCVC = rent.CardCVC,
+                CardExpMonth = rent.CardExpMonth,
+                CardExpYear = rent.CardExpYear,
+                CardHolderName = rent.CardHolderName,
+                EditPIN = rent.EditPIN
+            };
+        }
+
         // GET: api/Rents
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Rent>>> GetRents()
+        public async Task<ActionResult<IEnumerable<RentModel>>> GetRents()
         {
             if (_context.Rents == null)
             {
                 return NotFound();
             }
-            return await _context.Rents.ToListAsync();
+
+            List<Rent> rents = await _context.Rents.ToListAsync();
+
+            return Ok(rents.Select(EntityToModel).ToList());
         }
 
         // GET: api/Rents/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Rent>> GetRent(int id)
+        public async Task<ActionResult<RentModel>> GetRent(int id)
         {
             if (_context.Rents == null)
             {
                 return NotFound();
             }
-            var rent = await _context.Rents.FindAsync(id);
 
+            var rent = await _context.Rents.FindAsync(id);
             if (rent == null)
             {
                 return NotFound();
             }
 
-            return rent;
+            return Ok(EntityToModel(rent));
         }
 
         // PUT: api/Rents/5
@@ -85,9 +106,9 @@ namespace GetYoBike.Server.Controllers
         //functiile put sunt cele care dau UPDATE la ceva din DB
         public async Task<IActionResult> PutRent(int id, RentModel rentModel)
         {
-            Rent? rent = ModelToEntity(rentModel);
+            Rent rent = ModelToEntity(rentModel);
 
-            if (rent == null || id != rent.Id)
+            if (id != rent.Id)
             {
                 return BadRequest();
             }
@@ -119,36 +140,16 @@ namespace GetYoBike.Server.Controllers
         // POST: api/Rents
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Rent>> PostRent(RentModel rentModel)
+        public async Task<ActionResult<RentModel>> PostRent(RentModel rentModel)
         {
-            Rent? rent = ModelToEntity(rentModel);
+            Rent rent = ModelToEntity(rentModel);
 
-            if (rent == null)
-            {
-                return BadRequest();
-            }
-
-            if (_context.Rents == null)//mereu cand scrie "_context" inseamna ca se uita in baza de date dupa orice urmeaza dupa .
-                                       //spre ex"_context.Rents" se uita in baza de date de la rents
+            if (_context.Rents == null)
             {
                 return Problem("Entity set 'DataContext.Rents'  is null.");
             }
             _context.Rents.Add(rent);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (RentExists(rent.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRent", new { id = rent.RenterUserId }, rent);
         }
@@ -178,7 +179,7 @@ namespace GetYoBike.Server.Controllers
             return (_context.Rents?.Any(e => e.RenterUserId == id)).GetValueOrDefault();
         }
 
-        private void DiscountApplier(Rent rent) //await se foloseste inside a non-async method
+        private void DiscountApplier(Rent rent)
         {
             if (rent.RentHoursDuration > 4 && !rent.IsDiscounted)
             {

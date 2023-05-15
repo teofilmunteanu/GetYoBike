@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GetYoBike.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230511165015_init2")]
-    partial class init2
+    [Migration("20230514012138_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,10 +55,8 @@ namespace GetYoBike.Server.Migrations
 
             modelBuilder.Entity("GetYoBike.Server.Entities.Rent", b =>
                 {
-                    b.Property<int>("RenterUserId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RentedBikeId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("CardCVC")
@@ -73,12 +71,19 @@ namespace GetYoBike.Server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CardHolderName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CardNr")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Id")
+                    b.Property<bool>("IsDiscounted")
                         .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("PublicId")
                         .IsRequired()
@@ -90,9 +95,17 @@ namespace GetYoBike.Server.Migrations
                     b.Property<DateTime>("RentStartDate")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("RenterUserId", "RentedBikeId");
+                    b.Property<int>("RentedBikeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RenterUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("RentedBikeId");
+
+                    b.HasIndex("RenterUserId");
 
                     b.ToTable("Rents");
                 });

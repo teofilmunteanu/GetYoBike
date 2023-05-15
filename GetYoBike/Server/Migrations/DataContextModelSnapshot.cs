@@ -68,7 +68,15 @@ namespace GetYoBike.Server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CardHolderName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CardNr")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EditPIN")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -76,10 +84,6 @@ namespace GetYoBike.Server.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PublicId")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("RentHoursDuration")

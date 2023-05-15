@@ -14,6 +14,6 @@
         public string CardExpYear { get; set; }
         public string CardHolderName { get; set; }
 
-        public string PublicId { get; set; }
+        public string EditPIN { get; set; }
     }
 }

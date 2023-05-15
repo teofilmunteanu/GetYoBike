@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using static NuGet.Packaging.PackagingConstants;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -20,7 +19,7 @@ namespace GetYoBike.Server.Controllers
             _context = context;
         }
 
-        private Bike? ModelToEntity(BikeModel bikeModel)
+        private Bike ModelToEntity(BikeModel bikeModel)
         {
             //BikeType? bikeType = _context.BikeTypes.Find(bikeModel.TypeId); //_context.BikeTypes.FirstOrDefault(b => b.Type == (Types)bikeModel.TypeId);
             //if (bikeType == null)
@@ -37,33 +36,52 @@ namespace GetYoBike.Server.Controllers
             };
         }
 
+        private BikeModel EntityToModel(Bike bike)
+        {
+            //BikeType? bikeType = _context.BikeTypes.Find(bikeModel.TypeId); //_context.BikeTypes.FirstOrDefault(b => b.Type == (Types)bikeModel.TypeId);
+            //if (bikeType == null)
+            //{
+            //    return null;
+            //}
+            //eventually throw exception to be catched below(PUT/POST) and return bad request with exception error msg
+
+            return new BikeModel()
+            {
+                Id = bike.Id,
+                TypeId = bike.TypeId
+            };
+        }
+
         // GET: api/Bikes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Bike>>> GetBikes()
+        public async Task<ActionResult<IEnumerable<BikeModel>>> GetBikes()
         {
             if (_context.Bikes == null)
             {
                 return NotFound();
             }
-            return await _context.Bikes.ToListAsync();
+
+            List<Bike> bikes = await _context.Bikes.ToListAsync();
+
+            return Ok(bikes.Select(EntityToModel).ToList());
         }
 
         // GET: api/Bikes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Bike>> GetBike(int id)
+        public async Task<ActionResult<BikeModel>> GetBike(int id)
         {
             if (_context.Bikes == null)
             {
                 return NotFound();
             }
-            var bike = await _context.Bikes.FindAsync(id);
 
+            var bike = await _context.Bikes.FindAsync(id);
             if (bike == null)
             {
                 return NotFound();
             }
 
-            return bike;
+            return Ok(EntityToModel(bike));
         }
 
         // PUT: api/Bikes/5
@@ -71,9 +89,9 @@ namespace GetYoBike.Server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBike(int id, BikeModel bikeModel)
         {
-            Bike? bike = ModelToEntity(bikeModel);
+            Bike bike = ModelToEntity(bikeModel);
 
-            if (bike == null || id != bike.Id)
+            if (id != bike.Id)
             {
                 return BadRequest();
             }
@@ -102,14 +120,9 @@ namespace GetYoBike.Server.Controllers
         // POST: api/Bikes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Bike>> PostBike(BikeModel bikeModel)
+        public async Task<ActionResult<BikeModel>> PostBike(BikeModel bikeModel)
         {
-            Bike? bike = ModelToEntity(bikeModel);
-
-            if (bike == null)
-            {
-                return BadRequest();
-            }
+            Bike bike = ModelToEntity(bikeModel);
 
             if (_context.Bikes == null)
             {
@@ -154,7 +167,7 @@ namespace GetYoBike.Server.Controllers
             DateTime dateTimeFormatted;
             List<Rent> rentsInInterval = new List<Rent>();
             List<Bike> availableBikes = new List<Bike>();
-            
+
             //var rents = await _context.Rents.ToListAsync();
 
             if (DateTime.TryParse(dateTime, out dateTimeFormatted))
@@ -179,7 +192,7 @@ namespace GetYoBike.Server.Controllers
                 return NotFound();
             }
             //Console.WriteLine($"Setialized to universal format{dateTime.ToString("yyyy-MM-dd'T'HH:mm:ssZ")}"); 
-            return availableBikes;
+            return Ok(availableBikes);
         }
     }
 }
