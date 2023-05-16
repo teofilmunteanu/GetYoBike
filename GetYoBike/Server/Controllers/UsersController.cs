@@ -214,5 +214,17 @@ namespace GetYoBike.Server.Controllers
                 return false;
             return true;
         }
+
+        [HttpGet("checkUser")]
+        public async Task<IActionResult> CheckUser(string mail)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == mail);//caut user dupa mail
+            if (user == null)
+            { 
+                return NotFound(); 
+            }
+            return Ok(user);
+        }
+
     }
 }
