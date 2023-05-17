@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetYoBike.Server", "Server\GetYoBike.Server.csproj", "{35066888-2E45-41AE-972C-2E01AE5948CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GetYoBike.Server", "Server\GetYoBike.Server.csproj", "{35066888-2E45-41AE-972C-2E01AE5948CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetYoBike.Client", "Client\GetYoBike.Client.csproj", "{C33CADD4-865A-43CF-95EA-2013D9F0F005}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GetYoBike.Client", "Client\GetYoBike.Client.csproj", "{C33CADD4-865A-43CF-95EA-2013D9F0F005}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetYoBike.Shared", "Shared\GetYoBike.Shared.csproj", "{CB82075A-CC68-45EF-85A6-9ED7567597C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GetYoBike.Shared", "Shared\GetYoBike.Shared.csproj", "{CB82075A-CC68-45EF-85A6-9ED7567597C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
