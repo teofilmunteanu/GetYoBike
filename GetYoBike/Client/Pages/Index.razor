@@ -1,5 +1,9 @@
 ﻿@page "/"
 
+@using GetYoBike.Shared.Models;
+@inject HttpClient Http
+@inject NavigationManager NavManager
+
 <PageTitle>Index</PageTitle>
 
 <section class="section">
@@ -14,9 +18,9 @@
         <span class="image"><img src="assets/file-management.png"></span>
         <span><b>Change <br> Rent details </b></span>
         <span>
-            <input type="email" placeholder="Rent Email">
+            <input @bind="userEmail" type="email" placeholder="Rent Email">
         </span>
-        <span><button class="end-btn"><i class="fa fa-chevron-right"></i></button></span>
+        <button class="end-btn" @onclick="SendToRents"><i class="fa fa-chevron-right"></i></button>
     </div>
 
     <div class="div-button">
@@ -28,5 +32,16 @@
 
 </section>
 @code {
+    private UserModel user;
+    private string userEmail;
 
+    private async void SendToRents()
+    {
+        if (userEmail != "")
+        {
+            user = await Http.GetFromJsonAsync<UserModel>("api/User/FindUser/" + userEmail);
+            //NavManager.NavigateTo($"/rents/{userEmail}");
+            NavManager.NavigateTo("/rents");
+        }
+    }
 }
