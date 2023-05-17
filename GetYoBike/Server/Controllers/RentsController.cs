@@ -297,8 +297,34 @@ namespace GetYoBike.Server.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(ToUpdateRent);
             }
-
             return BadRequest("Invalid rent start date.");
+        }
+
+        private int generatePIN()//creez un pin random intre 6 cifre 
+        {
+            Random generator = new Random();
+            int PIN;
+            do
+            {
+                PIN = generator.Next(100000, 999999);
+            } while (PINmistaken(PIN));
+            return PIN;
+        }
+
+        private bool PINmistaken(int pin)//returneaza true daca PIN-ul e deja luat
+        {
+            return true;
+        }
+
+        [HttpPut("ChangeDuration{'id'}")]
+        public async Task<IActionResult> ChangeDuration(int id, Rent rent)
+        {
+            var durata = await _context.Rents.FindAsync(id);
+            if (durata == null)
+            {
+
+            }
+            return Ok("Duration updated successfully");
         }
 
     }

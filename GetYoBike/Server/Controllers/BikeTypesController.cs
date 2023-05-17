@@ -143,5 +143,15 @@ namespace GetYoBike.Server.Controllers
         {
             return (_context.BikeTypes?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+        [HttpPut("ChangeBikeType/{id}")]
+        public async Task<IActionResult> ChangeBikeType(int id,BikeType type)
+        {
+            Rent rent = await _context.Rents.FindAsync(id);
+            rent.RentedBike.Type = type;
+
+            await _context.SaveChangesAsync();
+            return Ok("Changed Bike Type");
+        }
     }
 }
