@@ -1,0 +1,90 @@
+﻿/* Header */
+header {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+    header b {
+        font-size: 25px;
+    }
+
+    header input {
+        width: 105px;
+    }
+
+    header div {
+        background-color: #91AD95;
+        height: 40px;
+        width: 200px;
+        display: flex;
+        align-items: center;
+        padding-left: 15px;
+        border-radius: 0.5em;
+        color: #fff;
+    }
+
+.edit-button {
+    background-color: #91AD95;
+    border-color: #91AD95;
+    border: none;
+}
+
+/* the wraper */
+.wraper {
+    background-color: #91AD95;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    padding: 51px;
+    margin: 0 50px;
+    border-radius: 1em;
+    text-align: center;
+    overflow: auto;
+    /* Uncomment this one to test the scroll function. */
+    /* height: 100px; */
+}
+
+    .wraper div {
+        height: 100px;
+        background-color: #698dc9;
+        margin: 15px;
+        border-radius: 1em;
+    }
+
+.card {
+    display: flex;
+    justify-content: space-between;
+    min-height: 100%;
+}
+
+    .card div {
+        height: 0;
+        color: #fff;
+    }
+
+    .card img {
+        width: 75px;
+    }
+
+    .card input {
+        width: 105px;
+        margin-top: 20%;
+    }
+
+    .card button {
+        background-color: #3D6062;
+        box-shadow: none;
+        border-color: #3D6062;
+        color: white;
+        margin-top: 50%;
+        border: none;
+        width: 50px;
+        height: 20px;
+    }
+
+.card-info {
+    display: flex;
+    flex-direction: column;
+}
