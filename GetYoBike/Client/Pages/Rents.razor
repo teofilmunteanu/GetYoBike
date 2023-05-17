@@ -1,0 +1,100 @@
+﻿@page "/rents"
+<header>
+    <b>Your Rents</b>
+    <span></span>
+    <span></span>
+    <div>
+        <!-- I made 2 code lines for each scenario.. either the "Edit rent" is a button or just a label just uncomment the wanted one. -->
+        <!-- <label for="input">Edit Rent &nbsp;</label><input type="number" placeholder="Enter Rent PIN">  -->
+        <button class="edit-button">Edit rent</button>&nbsp;<input type="number" placeholder="Enter Rent PIN">
+    </div>
+</header>
+
+<div class="wraper">
+    <!-- U need just one card and use it as a template to create more if needed with the data available  -->
+    <div class="card">
+        <div>
+            <img src="/assets/buildings.png"> <!-- Can hook the links to the database.An additional class can be added. -->
+        </div>
+        <div class="card-info">
+            <!-- The same here, link this to the database. -->
+            <div>Rent Start Date</div>
+            <div>dd/mm/yyyy</div>
+        </div>
+        <div class="card-info">
+            <!-- The same here, link this to the database. -->
+            <div>Duration</div>
+            <div>4</div>
+        </div>
+        <div class="card-info">
+            <!-- The same here, link this to the database. -->
+            <div>Price</div>
+            <div>65</div>
+        </div>
+        <div>
+            <button>Edit</button> <!-- There is a button. -->
+        </div>
+        <div>
+            <input type="number" placeholder="Enter Rent PIN"> <!-- Take the input from here -->
+        </div>
+    </div>
+
+    <div class="card">
+        <div>
+            <img src="/assets/buildings.png"> <!-- Can hook the links to the database.An additional class can be added. -->
+        </div>
+        <div class="card-info">
+            <!-- The same here, link this to the database. -->
+            <div>Rent Start Date</div>
+            <div>dd/mm/yyyy</div>
+        </div>
+        <div class="card-info">
+            <!-- The same here, link this to the database. -->
+            <div>Duration</div>
+            <div>4</div>
+        </div>
+        <div class="card-info">
+            <!-- The same here, link this to the database. -->
+            <div>Price</div>
+            <div>65</div>
+        </div>
+        <div>
+            <button>Edit</button> <!-- There is a button. -->
+        </div>
+        <div>
+            <input type="number" placeholder="Enter Rent PIN"> <!-- Take the input from here -->
+        </div>
+    </div>
+
+    <div class="card">
+        <div>
+            <img src="/assets/buildings.png"> <!-- Can hook the links to the database.An additional class can be added. -->
+        </div>
+        <div class="card-info">
+            <!-- The same here, link this to the database. -->
+            <div>Rent Start Date</div>
+            <div>dd/mm/yyyy</div>
+        </div>
+        <div class="card-info">
+            <!-- The same here, link this to the database. -->
+            <div>Duration</div>
+            <div>4</div>
+        </div>
+        <div class="card-info">
+            <!-- The same here, link this to the database. -->
+            <div>Price</div>
+            <div>65</div>
+        </div>
+        <div>
+            <button>Edit</button> <!-- There is a button. -->
+        </div>
+        <div>
+            <input type="number" placeholder="Enter Rent PIN"> <!-- Take the input from here -->
+        </div>
+    </div>
+
+</div>
+
+@code {
+
+}
