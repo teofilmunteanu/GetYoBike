@@ -1,0 +1,57 @@
+﻿@page "/checkout"
+
+<header>
+    <b><b style="color:#6594EF;">Rent City Bike</b> - Payment</b>
+</header>
+<div class="grid-container">
+
+    <div class="left">
+
+        <form action="" method="post" id="formContainer">
+            <div class="username">
+                <div class="cardnr-grid">
+                    <label for="Card Number" class="formLabel">Card Number</label>
+                    <br />
+                    <input type="number" name="Card Number" id="cardnumber" class="cardnr">
+                </div>
+                <div class="firstname-grid">
+                    <label for="first Name" class="formLabel">CVC</label>
+                    <br />
+                    <input type="number" name="First Name" id="firstname" class="cvc">
+                </div>
+                <div class="month-grid">
+                    <label for="month" class="formLabel">Card Expiration Date</label>
+                    <br />
+                    <input type="month" name="month" id="month" class="month" placeholder="month">
+                </div>
+                <div class="cardname-grid">
+                    <label for="cardname" class="formLabel">Name On Card</label>
+                    <br />
+                    <input type="cardname" name="cardname" id="cardname" class="cardname">
+                </div>
+
+                <br />
+            </div>
+        </form>
+        <div class="backbutton">
+            <i class="fa fa-arrow-left"></i><span> Rent Details</span>
+        </div>
+    </div>
+
+    <div class="right-top">
+        <img src="assets/rentbike.png" class="img-div">
+    </div>
+
+    <div class="right-bottom">
+        <total class="total">
+            <span>Total: 65 lei</span>
+        </total>
+        <button class="button" style="vertical-align:middle">
+            <span>Checkout </span>
+        </button>
+    </div>
+</div>
+
+@code {
+
+}

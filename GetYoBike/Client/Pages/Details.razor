@@ -1,0 +1,64 @@
+﻿@page "/details"
+
+<header>
+    <b><b style="color:#6594EF;">Rent City Bike</b> - Details</b>
+</header>
+<div class="grid-container">
+
+    <div class="left">
+
+        <form action="" method="post" id="formContainer">
+            <div class="username">
+                <div class="lastname-grid">
+                    <label for="Last Name" class="formLabel">Last Name</label>
+                    <br />
+                    <input type="text" name="Last Name" id="lastname" class="lastname">
+                </div>
+                <div class="firstname-grid">
+                    <label for="first Name" class="formLabel">First Name</label>
+                    <br />
+                    <input type="text" name="First Name" id="firstname" class="firstname">
+                </div>
+                <div class="email-grid">
+                    <label for="email" class="formLabel">Email</label>
+                    <br />
+                    <input type="email" name="email" id="email" class="email">
+                </div>
+                <div class="age-grid">
+                    <label for="Age" class="formLabel">Age</label>
+                    <br />
+                    <input type="text" name="Age" id="age" class="age">
+                </div>
+                <div class="rentstart-grid">
+                    <label for="rent" class="formLabel">Rent Start Date</label>
+                    <br />
+                    <input type="date" id="rent" class="rentstart" />
+                </div>
+                <div class="duration-grid">
+                    <label for="duration" class="formLabel">Duration</label>
+                    <br />
+                    <input type="number" name="duration" id="duration" class="duration" placeholder="hh">
+                </div>
+
+                <br />
+            </div>
+        </form>
+    </div>
+
+    <div class="right-top">
+        <img src="assets/rentbike.png" class="img-div">
+    </div>
+
+    <div class="right-bottom">
+        <total class="total">
+            <span>Total: 65 lei</span>
+        </total>
+        <button class="button" style="vertical-align:middle">
+            <span>Checkout </span>
+        </button>
+    </div>
+</div>
+
+@code {
+
+}
