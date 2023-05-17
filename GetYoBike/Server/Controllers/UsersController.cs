@@ -215,13 +215,13 @@ namespace GetYoBike.Server.Controllers
             return true;
         }
 
-        [HttpGet("checkUser")]
-        public async Task<IActionResult> CheckUser(string mail)
+        [HttpGet("FindUser/{mail}")]
+        public async Task<IActionResult> FindUserByMail(string mail)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == mail);//caut user dupa mail
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == mail);
             if (user == null)
-            { 
-                return NotFound(); 
+            {
+                return BadRequest();
             }
             return Ok(user);
         }
