@@ -307,22 +307,26 @@ namespace GetYoBike.Server.Controllers
             do
             {
                 PIN = generator.Next(100000, 999999);
-            } while (PINmistaken(PIN));
+            } while (IsPINTaken(PIN));
             return PIN;
         }
 
-        private bool PINmistaken(int pin)//returneaza true daca PIN-ul e deja luat
+        private bool IsPINTaken(int pin)//returneaza true daca PIN-ul e deja luat
         {
             return true;
         }
 
-        [HttpPut("ChangeDuration{'id'}")]
-        public async Task<IActionResult> ChangeDuration(int id, Rent rent)
+        [HttpPut("ChangeDuration/{id}")]
+        public async Task<IActionResult> ChangeDuration(int id)
         {
-            var durata = await _context.Rents.FindAsync(id);
-            if (durata == null)
+            Rent rent = await _context.Rents.FindAsync(id);
+            if(rent == null) 
             {
-
+                return NotFound();
+            } 
+            if (rent.RentHoursDuration == 0)
+            {
+                return BadRequest("Duration should be more than 0");
             }
             return Ok("Duration updated successfully");
         }
