@@ -2,8 +2,31 @@
 
 <PageTitle>Index</PageTitle>
 
-<h1>Hello, world!</h1>
+<section class="section">
 
-Welcome to your new app.
+    <div class="div-button" onclick="myFunction()">
+        <!--myFunction makes it work like a button-->
+        <span><img src="assets/buildings.png"></span>
+        <p><b>Rent <br> <span class="city">City</span> <br>Bike</b></p>
+    </div>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+    <div class="card">
+        <span class="image"><img src="assets/file-management.png"></span>
+        <span><b>Change <br> Rent details </b></span>
+        <span>
+            <input type="email" placeholder="Rent Email">
+        </span>
+        <span><button class="end-btn"><i class="fa fa-chevron-right"></i></button></span>
+    </div>
+
+    <div class="div-button">
+        <!--myFunction makes it work like a button-->
+        <span><img src="assets/mountain.png"></span>
+        <p><b>Rent <br> <span class="mountain">Mountain</span> <br>Bike</b></p>
+
+    </div>
+
+</section>
+@code {
+
+}

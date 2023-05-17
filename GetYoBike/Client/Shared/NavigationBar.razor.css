@@ -1,0 +1,33 @@
+﻿/* Nav bar */
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #874AC5;
+}
+
+li {
+    float: left;
+}
+
+    li a {
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+    }
+
+        li a:hover {
+            background-color: #9D71C9;
+        }
+
+    li:nth-child(2) {
+        border-right: 2px solid #fff;
+    }
+
+    li img {
+        width: 35px;
+        margin: 5px;
+    }
