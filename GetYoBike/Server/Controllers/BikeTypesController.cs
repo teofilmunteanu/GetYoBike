@@ -153,5 +153,6 @@ namespace GetYoBike.Server.Controllers
             await _context.SaveChangesAsync();
             return Ok("Changed Bike Type");
         }
+        
     }
 }

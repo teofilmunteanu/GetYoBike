@@ -2,6 +2,7 @@
 using GetYoBike.Server.Entities;
 using GetYoBike.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
@@ -317,20 +318,35 @@ namespace GetYoBike.Server.Controllers
         }
 
         [HttpPut("ChangeDuration/{id}")]
-        public async Task<IActionResult> ChangeDuration(int id)
+        public async Task<IActionResult> ChangeDuration(int id, [BindRequired] int duration)
         {
             Rent rent = await _context.Rents.FindAsync(id);
             if(rent == null) 
             {
                 return NotFound();
             } 
-            if (rent.RentHoursDuration == 0)
+            if (duration <= 0)
             {
                 return BadRequest("Duration should be more than 0");
             }
+            rent.RentHoursDuration=duration;
+            return Ok("Duration updated successfully");
+        }
+
+        [HttpGet("GetPrice/{id}")]
+        public async Task<IActionResult> CalculatePrice(int id)
+        {
+            Rent rent = await _context.Rents.FindAsync(id);
+            if (rent == null)
+            {
+                return NotFound();
+            }
+            rent.Price = rent.RentHoursDuration * rent.RentedBike.Type.Price;
+            DiscountApplier(rent);
             return Ok("Duration updated successfully");
         }
 
     }
+    
 
 }
