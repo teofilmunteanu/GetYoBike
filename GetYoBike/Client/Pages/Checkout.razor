@@ -50,7 +50,7 @@
 
     <div class="right-bottom">
         <total class="total">
-            <span>Total: 65 lei</span>
+            <span>Total: @Price lei</span>
         </total>
         <button class="button" style="vertical-align:middle">
             <span>Checkout </span>
@@ -65,7 +65,7 @@
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "type")]
-    public int BikeType { get; set; }
+    public int BikeTypeNr { get; set; }
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "date")]
@@ -77,9 +77,11 @@
 
     public string SelectedImagePath { get; set; } = "";
 
+    public decimal Price { get; set; } = 0;
+
     protected override async Task OnInitializedAsync()
     {
-        switch (BikeType)
+        switch (BikeTypeNr)
         {
             case 1:
                 SelectedImagePath = "assets/rentCityBike.png";
@@ -88,12 +90,24 @@
                 SelectedImagePath = "assets/rentMountainBike.png";
                 break;
         }
+
+        BikeTypeModel bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + BikeTypeNr);
+
+        if (RentDuration > 0)
+        {
+            Price = RentDuration * bikeType.Price;
+        }
+
+        if (RentDuration > 4)
+        {
+            Price *= 0.85m;
+        }
     }
 
     public void BackToDetails()
     {
         //Eventually give the parameters back(two types of @page)
         //$"/checkout?id={user.Id}&type={bikeTypeNr}&date={RentDate}&duration={RentDuration}"
-        NavManager.NavigateTo($"/details/{BikeType}");
+        NavManager.NavigateTo($"/details/{BikeTypeNr}");
     }
 }
