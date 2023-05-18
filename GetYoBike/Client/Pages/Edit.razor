@@ -13,17 +13,17 @@
                 <div class="email-grid">
                     <label for="email" class="formLabel">Email</label>
                     <br />
-                    <input type="email" name="email" id="email" class="email">
+                    <input type="email" name="email" id="email" class="email" @bind="Email">
                 </div>
                 <div class="rentstart-grid">
                     <label for="rent" class="formLabel">Rent Start Date</label>
                     <br />
-                    <input type="date" id="rent" class="rentstart" />
+                    <input type="date" id="rent" class="rentstart" @bind="Date" />
                 </div>
                 <div class="duration-grid">
                     <label for="duration" class="formLabel">Duration</label>
                     <br />
-                    <input type="number" name="duration" id="duration" class="duration" placeholder="hh">
+                    <input type="number" name="duration" id="duration" class="duration" placeholder="hh" @bind="Duration">
                 </div>
 
                 <br />
@@ -76,7 +76,7 @@
     public string LastName { get; set; } = "";
     public string FirstName { get; set; } = "";
     public string Email { get; set; } = "";
-    public int Age { get; set; }
+    public DateTime Date { get; set; }
 
     public string message = "";
 
