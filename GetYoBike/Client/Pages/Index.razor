@@ -8,8 +8,7 @@
 
 <section class="section">
 
-    <div class="div-button" @onclick="SendToRents">
-        <!--myFunction makes it work like a button-->
+    <div class="div-button" @onclick="SendToCityRent">
         <span><img src="assets/buildings.png"></span>
         <p><b>Rent <br> <span class="city">City</span> <br>Bike</b></p>
     </div>
@@ -24,7 +23,7 @@
         <span><button class="end-btn" @onclick="SendToRents"><i class="fa fa-chevron-right"></i></button></span>
     </div>
 
-    <div class="div-button">
+    <div class="div-button" @onclick="SendToMountainRent">
         <!--myFunction makes it work like a button-->
         <span><img src="assets/mountain.png"></span>
         <p><b>Rent <br> <span class="mountain">Mountain</span> <br>Bike</b></p>
@@ -41,5 +40,15 @@
         {
             NavManager.NavigateTo($"/rents?email={userEmail}");
         }
+    }
+
+    private void SendToCityRent()
+    {
+        NavManager.NavigateTo("/details/1");
+    }
+
+    private void SendToMountainRent()
+    {
+        NavManager.NavigateTo("/details/2");
     }
 }

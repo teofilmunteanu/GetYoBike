@@ -136,6 +136,11 @@ namespace GetYoBike.Server.Controllers
                 return Problem("Entity set 'DataContext.Rents'  is null.");
             }
 
+            if (rent.RentHoursDuration > 48)
+            {
+                return BadRequest("Rent can't be longer than 48h");
+            }
+
             if (!(rent.ValidateCardDate() && rent.ValidateCardholderName() &&
                 rent.ValidateCardNumber() && rent.ValidateCVC()))
             {

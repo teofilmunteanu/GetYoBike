@@ -1,6 +1,21 @@
 ﻿<header>
-    <b><b style="color:#6594EF;">Rent City Bike</b> - Details</b>
+    <b><b style="color:@Color;">@Title</b>@Subtitle</b>
 </header>
+
 @code {
+    [Parameter]
+    public string Color { get; set; } = "#000";
+    [Parameter]
+    public string Title { get; set; } = "";
+    [Parameter]
+    public string Subtitle { get; set; } = "";
+
+    protected override void OnInitialized()
+    {
+        if (Subtitle != "")
+        {
+            Subtitle = " - " + Subtitle;
+        }
+    }
 
 }

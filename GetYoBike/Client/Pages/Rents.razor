@@ -1,6 +1,7 @@
 ﻿@page "/rents"
 
 @using GetYoBike.Shared.Models;
+@inject IJSRuntime JsRuntime
 @inject HttpClient Http
 @inject NavigationManager NavManager
 
@@ -14,33 +15,32 @@
 </header>
 
 <div class="wraper">
-    <!-- U need just one card and use it as a template to create more if needed with the data available  -->
     @foreach (var rent in rents)
     {
         <div class="card">
             <div>
-                <img src="/assets/buildings.png"> <!-- Can hook the links to the database.An additional class can be added. -->
+                <img src="/assets/buildings.png"> 
             </div>
             <div class="card-info">
-                <!-- The same here, link this to the database. -->
+
                 <div>Rent Start Date</div>
                 <div>@rent.RentStartDate.ToShortDateString()</div>
             </div>
             <div class="card-info">
-                <!-- The same here, link this to the database. -->
+
                 <div>Duration</div>
                 <div>@rent.RentHoursDuration</div>
             </div>
             <div class="card-info">
-                <!-- The same here, link this to the database. -->
+
                 <div>Price</div>
                 <div>@rent.Price</div>
             </div>
             <div>
-                <button>Edit</button> <!-- There is a button. -->
+                <button>Edit</button> 
             </div>
             <div>
-                <input type="number" placeholder="Enter Rent PIN"> <!-- Take the input from here -->
+                <input type="number" placeholder="Enter Rent PIN"> 
             </div>
         </div>
     }
@@ -55,9 +55,28 @@
 
     public List<RentModel> rents { get; set; } = new List<RentModel>();
 
+    public string message = "";
+
     protected override async Task OnInitializedAsync()
     {
-        UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/FindUserByMail/" + Email);
-        rents = await Http.GetFromJsonAsync<List<RentModel>>("api/Rents/GetRentsOfUser/" + user.Id);
+        var response = await Http.GetAsync("api/Users/FindUserByMail/" + Email);
+        if (response.IsSuccessStatusCode)
+        {
+            UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/FindUserByMail/" + Email);
+            rents = await Http.GetFromJsonAsync<List<RentModel>>("api/Rents/GetRentsOfUser/" + user.Id);
+        }
+        else if(response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            message = "No rents found";
+        }
+        else
+        {
+            message = response.Content.ReadAsStringAsync().Result;
+        }
+        
+        if (message != "")
+        {
+            await JsRuntime.InvokeVoidAsync("alert", message);
+        }
     }
 }

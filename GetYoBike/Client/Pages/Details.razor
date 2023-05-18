@@ -1,11 +1,16 @@
-﻿@page "/details"
+﻿@page "/details/{bikeTypeNr:int}"
+
+
+@inject IJSRuntime JsRuntime
+@using GetYoBike.Shared.Models;
+@inject NavigationManager NavManager
+@inject HttpClient Http
 
 @*<header>
     <b><b style="color:#6594EF;">Rent City Bike</b> - Details</b>
 </header>*@
-<Header />
+<Header Color="#6594EF" Title="Rent City Bike" Subtitle="Details"/>
 <div class="grid-container">
-
     <div class="left">
 
         <form action="" method="post" id="formContainer">
@@ -13,32 +18,33 @@
                 <div class="lastname-grid">
                     <label for="Last Name" class="formLabel">Last Name</label>
                     <br />
-                    <input type="text" name="Last Name" id="lastname" class="lastname">
+                    <input type="text" name="Last Name" id="lastname" class="lastname" @bind="LastName">
                 </div>
                 <div class="firstname-grid">
                     <label for="first Name" class="formLabel">First Name</label>
                     <br />
-                    <input type="text" name="First Name" id="firstname" class="firstname">
+                    <input type="text" name="First Name" id="firstname" class="firstname" @bind="FirstName">
                 </div>
                 <div class="email-grid">
                     <label for="email" class="formLabel">Email</label>
                     <br />
-                    <input type="email" name="email" id="email" class="email">
+                    <input type="email" name="email" id="email" class="email" @bind="Email">
                 </div>
                 <div class="age-grid">
                     <label for="Age" class="formLabel">Age</label>
                     <br />
-                    <input type="text" name="Age" id="age" class="age">
+                    <input type="text" name="Age" id="age" class="age" @bind="Age">
                 </div>
                 <div class="rentstart-grid">
                     <label for="rent" class="formLabel">Rent Start Date</label>
                     <br />
-                    <input type="date" id="rent" class="rentstart" />
+                    <input type="date" id="rent" class="rentstart" @bind="RentDate"/>
                 </div>
                 <div class="duration-grid">
                     <label for="duration" class="formLabel">Duration</label>
                     <br />
-                    <input type="number" name="duration" id="duration" class="duration" placeholder="hh">
+                    <input type="number" name="duration" id="duration" class="duration" placeholder="hh"
+                           @bind="RentDuration" @bind:after="SetPrice">
                 </div>
 
                 <br />
@@ -47,19 +53,99 @@
     </div>
 
     <div class="right-top">
-        <img src="assets/rentCityBike.png" class="img-div">
+        <img src="@SelectedImagePath" class="img-div">
     </div>
 
     <div class="right-bottom">
         <total class="total">
-            <span>Total: 65 lei</span>
+            <span>Total: @Price lei</span>
         </total>
-        <button class="button" style="vertical-align:middle">
+        <button class="button" style="vertical-align:middle" @onclick="SendToCheckout">
             <span>Checkout </span>
         </button>
     </div>
 </div>
 
 @code {
+    [Parameter]
+    public int bikeTypeNr { get; set; } = 0;
 
+    public string SelectedImagePath { get; set; } = "";
+    public decimal Price { get; set; } = 0;
+    private decimal pricePerH { get; set; }
+
+    public DateTime RentDate { get; set; } = DateTime.Now;
+    public int RentDuration { get; set; } = 0;
+    public string LastName { get; set; } = "";
+    public string FirstName { get; set; } = "";
+    public string Email { get; set; } = "";
+    public int Age { get; set; }
+
+    public string message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        switch (bikeTypeNr)
+        {
+            case 1:
+                SelectedImagePath = "assets/rentCityBike.png";
+                break;
+            case 2:
+                SelectedImagePath = "assets/rentMountainBike.png";
+                break;
+        }
+
+        BikeTypeModel bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + bikeTypeNr);
+        pricePerH = bikeType.Price;
+    }
+
+    private void SetPrice()
+    {    
+        if(RentDuration > 0)
+        {
+            Price = RentDuration * pricePerH;
+        }
+
+        if(RentDuration > 4)
+        {
+            Price *= 0.85m;
+        }
+    }
+
+    private async void SendToCheckout()
+    {
+        if(Price > 0)
+        {
+            UserModel user = new UserModel
+                {
+                    Email = this.Email,
+                    LastName = this.LastName,
+                    FirstName = this.FirstName,
+                    Age = this.Age
+                };
+
+            var response = await Http.PostAsJsonAsync("/api/Users/", user);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string dateString = RentDate.ToString();
+
+                NavManager.NavigateTo($"/checkout?id={user.Id}&type={bikeTypeNr}&date={dateString}&duration={RentDuration}");
+            }
+            else
+            {
+                message = response.Content.ReadAsStringAsync().Result;
+            }
+        }
+        else
+        {
+            message = "Price cannot be 0";
+        }
+
+        if(message != "")
+        {
+            await JsRuntime.InvokeVoidAsync("alert", message);
+        }
+        
+    }
 }

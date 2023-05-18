@@ -213,7 +213,7 @@ namespace GetYoBike.Server.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == mail);
             if (user == null)
             {
-                return BadRequest();
+                return NotFound();
             }
             return Ok(user);
         }

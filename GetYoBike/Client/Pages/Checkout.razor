@@ -1,9 +1,14 @@
 ﻿@page "/checkout"
 
+@inject IJSRuntime JsRuntime
+@using GetYoBike.Shared.Models;
+@inject NavigationManager NavManager
+@inject HttpClient Http
+
 @*<header>
     <b><b style="color:#6594EF;">Rent City Bike</b> - Payment</b>
 </header>*@
-<Header/>
+<Header Color="#6594EF" Title="Rent City Bike" Subtitle="Payment" />
 <div class="grid-container">
 
     <div class="left">
@@ -34,13 +39,13 @@
                 <br />
             </div>
         </form>
-        <div class="backbutton">
+        <div class="backbutton" @onclick="BackToDetails">
             <i class="fa fa-arrow-left"></i><span> Rent Details</span>
         </div>
     </div>
 
     <div class="right-top">
-        <img src="assets/rentCityBike.png" class="img-div">
+        <img src="@SelectedImagePath" class="img-div">
     </div>
 
     <div class="right-bottom">
@@ -54,5 +59,41 @@
 </div>
 
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "userId")]
+    public int UserId{ get; set; }
 
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "type")]
+    public int BikeType { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "date")]
+    public string RentDate { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "duration")]
+    public int RentDuration { get; set; }
+
+    public string SelectedImagePath { get; set; } = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        switch (BikeType)
+        {
+            case 1:
+                SelectedImagePath = "assets/rentCityBike.png";
+                break;
+            case 2:
+                SelectedImagePath = "assets/rentMountainBike.png";
+                break;
+        }
+    }
+
+    public void BackToDetails()
+    {
+        //Eventually give the parameters back(two types of @page)
+        //$"/checkout?id={user.Id}&type={bikeTypeNr}&date={RentDate}&duration={RentDuration}"
+        NavManager.NavigateTo($"/details/{BikeType}");
+    }
 }
