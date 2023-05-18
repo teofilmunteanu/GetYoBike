@@ -1,5 +1,10 @@
 ﻿@page "/edit"
 
+@inject IJSRuntime JsRuntime
+@using GetYoBike.Shared.Models;
+@inject NavigationManager NavManager
+@inject HttpClient Http
+
 @*<header>
     <b>Edit Rent Details</b>
 </header>*@
@@ -39,12 +44,12 @@
         <div class="wrapper">
             <div class="tabs">
                 <div class="tab">
-                    <input type="radio" name="css-tabs" id="tab-1" checked class="tab-switch">
+                    <input type="radio" name="css-tabs" id="tab-1" class="tab-switch" checked="@(Type == 1)" @onchange="@(() => {Type = 1; SetType();})">
                     <label for="tab-1" class="tab-label"><img src="assets/buildings.png" class="img-tab"></label>
                     <div class="tab-content"><img src="assets/rentCityBike.png" class="img-div"></div>
                 </div>
                 <div class="tab">
-                    <input type="radio" name="css-tabs" id="tab-2" class="tab-switch">
+                    <input type="radio" name="css-tabs" id="tab-2" class="tab-switch" checked="@(Type == 2)" @onchange="@(() => Type = 2)">
                     <label for="tab-2" class="tab-label"><img src="assets/mountain.png" class="img-tab"></label>
                     <div class="tab-content"><img src="assets/rentMountainBike.png" class="img-div"></div>
                 </div>
@@ -77,9 +82,14 @@
     public string FirstName { get; set; } = "";
     public string Email { get; set; } = "";
     public DateTime Date { get; set; }
+    public int Type { get; set; } = 1;
 
     public string message = "";
 
+    public async void SetType()
+    {
+        await JsRuntime.InvokeVoidAsync("alert", Type.ToString());
+    }
     //protected override async Task OnInitializedAsync()
     //{
       //  var response = await Http.GetAsync("api/Rents/FindUserByMail/" + Email);
