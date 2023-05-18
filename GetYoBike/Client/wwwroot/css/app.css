@@ -8,7 +8,7 @@ body {
     outline: 0;
     font-size: 100%;
     vertical-align: baseline;
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
 h1:focus {
