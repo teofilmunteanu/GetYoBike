@@ -72,7 +72,7 @@
 
     [Parameter]
     public DateTime RentDate { get; set; } = DateTime.Now;
-    public int RentDuration { get; set; } = 0;
+    public int Duration { get; set; } = 0;
     public string LastName { get; set; } = "";
     public string FirstName { get; set; } = "";
     public string Email { get; set; } = "";
@@ -85,7 +85,7 @@
       //  var response = await Http.GetAsync("api/Rents/FindUserByMail/" + Email);
        // if (response.IsSuccessStatusCode)
         //{
-    // UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/PostRent/";
+    // UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/PostRent/" ;
            // rents = await Http.GetFromJsonAsync<List<RentModel>>("api/Rents/GetRentsOfUser/" + user.Id);
        // }
    // }
