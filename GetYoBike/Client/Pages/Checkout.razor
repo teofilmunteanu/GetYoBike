@@ -18,22 +18,22 @@
                 <div class="cardnr-grid">
                     <label for="Card Number" class="formLabel">Card Number</label>
                     <br />
-                    <input type="number" name="Card Number" id="cardnumber" class="cardnr">
+                    <input type="number" name="Card Number" id="cardnumber" class="cardnr" @bind="NrCard">
                 </div>
                 <div class="firstname-grid">
                     <label for="first Name" class="formLabel">CVC</label>
                     <br />
-                    <input type="number" name="First Name" id="firstname" class="cvc">
+                    <input type="text" name="First Name" id="firstname" class="cvc" @bind="FirstName">
                 </div>
                 <div class="month-grid">
                     <label for="month" class="formLabel">Card Expiration Date</label>
                     <br />
-                    <input type="month" name="month" id="month" class="month" placeholder="month">
+                    <input type="month" name="month" id="month" class="month" placeholder="month" @bind="Month">
                 </div>
                 <div class="cardname-grid">
                     <label for="cardname" class="formLabel">Name On Card</label>
                     <br />
-                    <input type="cardname" name="cardname" id="cardname" class="cardname">
+                    <input type="cardname" name="cardname" id="cardname" class="cardname" @bind="CardName">
                 </div>
 
                 <br />
@@ -78,6 +78,14 @@
     public string SelectedImagePath { get; set; } = "";
 
     public decimal Price { get; set; } = 0;
+
+    public int NrCard { get; set; } = 0;
+
+    public string FirstName { get; set; } = "";
+
+    public DateTime Month { get; set; }
+
+    public string CardName { get; set; } = "";
 
     protected override async Task OnInitializedAsync()
     {
