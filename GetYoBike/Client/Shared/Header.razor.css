@@ -1,0 +1,26 @@
+﻿header {
+    height: 100px;
+    display: flex;
+    align-items: last baseline;
+    justify-content: start;
+    padding: 0 0 0 80px;
+}
+
+    header b {
+        font-size: 40px;
+    }
+
+    header input {
+        width: 105px;
+    }
+
+    header div {
+        background-color: #91AD95;
+        height: 40px;
+        width: 200px;
+        display: flex;
+        align-items: center;
+        padding-left: 15px;
+        border-radius: 0.5em;
+        color: #fff;
+    }
