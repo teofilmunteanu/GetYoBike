@@ -20,7 +20,8 @@
         <span>
             <input @bind="userEmail" type="email" placeholder="Rent Email">
         </span>
-        <button class="end-btn" @onclick="SendToRents"><i class="fa fa-chevron-right"></i></button>
+
+        <span><button class="end-btn" @onclick="SendToRents"><i class="fa fa-chevron-right"></i></button></span>
     </div>
 
     <div class="div-button">
@@ -33,13 +34,13 @@
 </section>
 @code {
     private UserModel user;
-    private string userEmail;
+    private string userEmail = "string";
 
     private async void SendToRents()
     {
         if (userEmail != "")
         {
-            user = await Http.GetFromJsonAsync<UserModel>("api/User/FindUser/" + userEmail);
+            user = await Http.GetFromJsonAsync<UserModel>("api/Users/FindUser/"+userEmail);
             //NavManager.NavigateTo($"/rents/{userEmail}");
             NavManager.NavigateTo("/rents");
         }
