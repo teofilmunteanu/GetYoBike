@@ -105,8 +105,10 @@
 .img-div {
     position: relative;
     margin: 10px;
-    height: auto;
+    height: 75%;
+    width: 75%;
     max-width: 90%;
+    border-radius: 15px;
 }
 
 
@@ -251,7 +253,6 @@
     z-index: 1;
     top: 8.5em;
     left: 0;
-    padding: 1.618rem;
     background: #90AC94;
     color: #2c3e50;
     border-bottom: none;
