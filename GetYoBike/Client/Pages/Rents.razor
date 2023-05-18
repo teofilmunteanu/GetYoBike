@@ -1,4 +1,9 @@
-﻿@page "/rents/{email}"
+﻿@page "/rents"
+
+@using GetYoBike.Shared.Models;
+@inject HttpClient Http
+@inject NavigationManager NavManager
+
 <header>
     <b>Your Rents</b>
     <span></span>
@@ -10,95 +15,49 @@
 
 <div class="wraper">
     <!-- U need just one card and use it as a template to create more if needed with the data available  -->
-    <div class="card">
-        <div>
-            <img src="/assets/buildings.png"> <!-- Can hook the links to the database.An additional class can be added. -->
+    @foreach (var rent in rents)
+    {
+        <div class="card">
+            <div>
+                <img src="/assets/buildings.png"> <!-- Can hook the links to the database.An additional class can be added. -->
+            </div>
+            <div class="card-info">
+                <!-- The same here, link this to the database. -->
+                <div>Rent Start Date</div>
+                <div>@rent.RentStartDate.ToShortDateString()</div>
+            </div>
+            <div class="card-info">
+                <!-- The same here, link this to the database. -->
+                <div>Duration</div>
+                <div>@rent.RentHoursDuration</div>
+            </div>
+            <div class="card-info">
+                <!-- The same here, link this to the database. -->
+                <div>Price</div>
+                <div>@rent.Price</div>
+            </div>
+            <div>
+                <button>Edit</button> <!-- There is a button. -->
+            </div>
+            <div>
+                <input type="number" placeholder="Enter Rent PIN"> <!-- Take the input from here -->
+            </div>
         </div>
-        <div class="card-info">
-            <!-- The same here, link this to the database. -->
-            <div>Rent Start Date</div>
-            <div>dd/mm/yyyy</div>
-        </div>
-        <div class="card-info">
-            <!-- The same here, link this to the database. -->
-            <div>Duration</div>
-            <div>4</div>
-        </div>
-        <div class="card-info">
-            <!-- The same here, link this to the database. -->
-            <div>Price</div>
-            <div>65</div>
-        </div>
-        <div>
-            <button>Edit</button> <!-- There is a button. -->
-        </div>
-        <div>
-            <input type="number" placeholder="Enter Rent PIN"> <!-- Take the input from here -->
-        </div>
-    </div>
-
-    <div class="card">
-        <div>
-            <img src="/assets/buildings.png"> <!-- Can hook the links to the database.An additional class can be added. -->
-        </div>
-        <div class="card-info">
-            <!-- The same here, link this to the database. -->
-            <div>Rent Start Date</div>
-            <div>dd/mm/yyyy</div>
-        </div>
-        <div class="card-info">
-            <!-- The same here, link this to the database. -->
-            <div>Duration</div>
-            <div>4</div>
-        </div>
-        <div class="card-info">
-            <!-- The same here, link this to the database. -->
-            <div>Price</div>
-            <div>65</div>
-        </div>
-        <div>
-            <button>Edit</button> <!-- There is a button. -->
-        </div>
-        <div>
-            <input type="number" placeholder="Enter Rent PIN"> <!-- Take the input from here -->
-        </div>
-    </div>
-
-    <div class="card">
-        <div>
-            <img src="/assets/buildings.png"> <!-- Can hook the links to the database.An additional class can be added. -->
-        </div>
-        <div class="card-info">
-            <!-- The same here, link this to the database. -->
-            <div>Rent Start Date</div>
-            <div>dd/mm/yyyy</div>
-        </div>
-        <div class="card-info">
-            <!-- The same here, link this to the database. -->
-            <div>Duration</div>
-            <div>4</div>
-        </div>
-        <div class="card-info">
-            <!-- The same here, link this to the database. -->
-            <div>Price</div>
-            <div>65</div>
-        </div>
-        <div>
-            <button>Edit</button> <!-- There is a button. -->
-        </div>
-        <div>
-            <input type="number" placeholder="Enter Rent PIN"> <!-- Take the input from here -->
-        </div>
-    </div>
+    }
+    
 
 </div>
 
 @code {
     [Parameter]
-    public string email { get; set; }
+    [SupplyParameterFromQuery(Name = "email")]
+    public string Email { get; set; } = "";
 
-    protected override void OnParametersSet()
+    public List<RentModel> rents { get; set; } = new List<RentModel>();
+
+    protected override async Task OnInitializedAsync()
     {
-        var test = email;
+        UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/FindUserByMail/" + Email);
+        rents = await Http.GetFromJsonAsync<List<RentModel>>("api/Rents/GetRentsOfUser/" + user.Id);
     }
 }

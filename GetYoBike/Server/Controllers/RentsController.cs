@@ -23,21 +23,12 @@ namespace GetYoBike.Server.Controllers
 
         private Rent ModelToEntity(RentModel bikeTypeModel)
         {
-            // Pun eu rentedUser si rentedBike sau se pune singure din DbContext?? NU TB SA SE PUNA IN DB
-            //User? renterUser = _context.Users.Find(bikeTypeModel.UserID);
-            //Bike? rentedBike = _context.Bikes.Find(bikeTypeModel.BikeID);
-
-            //if (renterUser == null || rentedBike == null)
-            //{
-            //    return null;
-            //}
-            //eventually throw exception to be caught below(PUT/POST) and return bad request with exception error msg
-
             return new Rent()
             {
                 Id = bikeTypeModel.Id,
                 RenterUserId = bikeTypeModel.UserID,
                 RentedBikeId = bikeTypeModel.BikeID,
+                Price = bikeTypeModel.Price,
                 RentStartDate = bikeTypeModel.RentStartDate,
                 RentHoursDuration = bikeTypeModel.RentHoursDuration,
                 CardNr = bikeTypeModel.CardNr,
@@ -46,8 +37,6 @@ namespace GetYoBike.Server.Controllers
                 CardExpYear = bikeTypeModel.CardExpYear,
                 CardHolderName = bikeTypeModel.CardHolderName,
                 EditPIN = bikeTypeModel.EditPIN
-                //RenterUser = renterUser,
-                //RentedBike = rentedBike
             };
         }
 
@@ -58,6 +47,7 @@ namespace GetYoBike.Server.Controllers
                 Id = rent.Id,
                 UserID = rent.RenterUserId,
                 BikeID = rent.RentedBikeId,
+                Price = rent.Price,
                 RentStartDate = rent.RentStartDate,
                 RentHoursDuration = rent.RentHoursDuration,
                 CardNr = rent.CardNr,
@@ -321,15 +311,15 @@ namespace GetYoBike.Server.Controllers
         public async Task<IActionResult> ChangeDuration(int id, [BindRequired] int duration)
         {
             Rent rent = await _context.Rents.FindAsync(id);
-            if(rent == null) 
+            if (rent == null)
             {
                 return NotFound();
-            } 
+            }
             if (duration <= 0)
             {
                 return BadRequest("Duration should be more than 0");
             }
-            rent.RentHoursDuration=duration;
+            rent.RentHoursDuration = duration;
             return Ok("Duration updated successfully");
         }
 
@@ -346,7 +336,17 @@ namespace GetYoBike.Server.Controllers
             return Ok("Duration updated successfully");
         }
 
-    }
-    
+        [HttpGet("GetRentsOfUser/{id}")]
+        public async Task<ActionResult<IEnumerable<UserModel>>> GetRentsOfUser(int id)
+        {
+            User user = await _context.Users.Include(u => u.Rents).Where(u => u.Id == id).FirstAsync();
 
+            if (user == null || user.Rents == null)
+            {
+                return NotFound();
+            }
+
+            return Ok((user.Rents).Select(EntityToModel).ToList());
+        }
+    }
 }

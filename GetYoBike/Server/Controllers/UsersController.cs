@@ -215,7 +215,7 @@ namespace GetYoBike.Server.Controllers
             return true;
         }
 
-        [HttpGet("FindUser/{mail}")]
+        [HttpGet("FindUserByMail/{mail}")]
         public async Task<IActionResult> FindUserByMail(string mail)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == mail);
@@ -225,6 +225,5 @@ namespace GetYoBike.Server.Controllers
             }
             return Ok(user);
         }
-
     }
 }

@@ -179,5 +179,21 @@ namespace GetYoBike.Server.Controllers
             //Console.WriteLine($"Setialized to universal format{dateTime.ToString("yyyy-MM-dd'T'HH:mm:ssZ")}"); 
             return Ok(availableBikes);
         }
+
+        [HttpPut("ChangeBikeType/{id}")]
+        public async Task<IActionResult> ChangeBikeType(int id, int bikeTypeId)
+        {
+            _context.Bikes.Include(b => b.Type);
+            Bike bike = await _context.Bikes.FindAsync(id);
+            if (bike == null)
+            {
+                return NotFound();
+            }
+
+            bike.TypeId = bikeTypeId;
+
+            await _context.SaveChangesAsync();
+            return Ok("Changed Bike Type");
+        }
     }
 }

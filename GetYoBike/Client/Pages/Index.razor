@@ -8,7 +8,7 @@
 
 <section class="section">
 
-    <div class="div-button" onclick="myFunction()">
+    <div class="div-button" @onclick="SendToRents">
         <!--myFunction makes it work like a button-->
         <span><img src="assets/buildings.png"></span>
         <p><b>Rent <br> <span class="city">City</span> <br>Bike</b></p>
@@ -33,15 +33,13 @@
 
 </section>
 @code {
-    private UserModel user;
-    private string userEmail = "string";
+    private string userEmail = "";
 
-    private async void SendToRents()
+    private void SendToRents()
     {
         if (userEmail != "")
         {
-            user = await Http.GetFromJsonAsync<UserModel>("api/Users/FindUser/"+userEmail);
-            NavManager.NavigateTo($"/rents/{userEmail}");
+            NavManager.NavigateTo($"/rents?email={userEmail}");
         }
     }
 }

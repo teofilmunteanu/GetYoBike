@@ -5,6 +5,9 @@
         public int Id { get; set; }
         public int UserID { get; set; }
         public int BikeID { get; set; }
+
+        public decimal Price { get; set; }
+
         public DateTime RentStartDate { get; set; }
         public int RentHoursDuration { get; set; }
 
