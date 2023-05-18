@@ -41,8 +41,7 @@
         if (userEmail != "")
         {
             user = await Http.GetFromJsonAsync<UserModel>("api/Users/FindUser/"+userEmail);
-            //NavManager.NavigateTo($"/rents/{userEmail}");
-            NavManager.NavigateTo("/rents");
+            NavManager.NavigateTo($"/rents/{userEmail}");
         }
     }
 }

@@ -153,15 +153,15 @@ namespace GetYoBike.Server.Controllers
             List<Rent> rentsInInterval = new List<Rent>();
             List<Bike> availableBikes = new List<Bike>();
 
-            //var rents = await _context.Rents.ToListAsync();
-
             if (DateTime.TryParse(dateTime, out dateTimeFormatted))
             {
                 List<int> unavailableBikesIds = new List<int>();
 
-                //List<Rent> activeRents = rents.Where(r => r.RentStartDate.AddHours(r.RentHoursDuration) > dateTimeFormatted &&
-                //    r.RentStartDate < dateTimeFormatted.AddHours((double)duration)).ToList();
-                //activeRents.ForEach(r => unavailableBikesIds.Add(r.RentedBike.Id));
+                List<Rent> rents = await _context.Rents.Include(r => r.RentedBike).ToListAsync();
+
+                List<Rent> activeRents = rents.Where(r => r.RentStartDate.AddHours(r.RentHoursDuration) > dateTimeFormatted &&
+                    r.RentStartDate < dateTimeFormatted.AddHours((double)duration)).ToList();
+                activeRents.ForEach(r => unavailableBikesIds.Add(r.RentedBike.Id));
 
                 //verifica daca vreunul din renturi contine bike-ul acesta                
 

@@ -206,8 +206,10 @@
 }
 
 .tabs {
-    position: relative;
-    margin: 0 10px;
+    position: absolute;
+    margin: 0px 25px;
+    left: 0;
+    right: 0;
     background: #5576A8;
     height: auto;
 }
