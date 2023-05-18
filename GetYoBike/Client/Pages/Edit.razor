@@ -44,7 +44,7 @@
         <div class="wrapper">
             <div class="tabs">
                 <div class="tab">
-                    <input type="radio" name="css-tabs" id="tab-1" class="tab-switch" checked="@(Type == 1)" @onchange="@(() => {Type = 1; SetType();})">
+                    <input type="radio" name="css-tabs" id="tab-1" class="tab-switch" checked="@(Type == 1)" @onchange="@(() => Type = 1)">
                     <label for="tab-1" class="tab-label"><img src="assets/buildings.png" class="img-tab"></label>
                     <div class="tab-content"><img src="assets/rentCityBike.png" class="img-div"></div>
                 </div>
