@@ -76,7 +76,7 @@ namespace GetYoBike.Server.Entities
         {
             //fac parse la card date string si l transform intr-un obiect de tipul DateTime 
             DateTime expirationDate;
-            //if (!DateTime.TryParseExact(CardExpMonth + "/" + CardExpYear, "MM/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out expirationDate))
+            
             if (!DateTime.TryParse(CardExpYear + "-" + CardExpMonth, out expirationDate))
             {
                 return false;
