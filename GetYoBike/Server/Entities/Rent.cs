@@ -1,24 +1,47 @@
-﻿namespace GetYoBike.Server.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace GetYoBike.Server.Entities
 {
     public class Rent
     {
         public int Id { get; set; }
+
+        [Required]
         public int RenterUserId { get; set; }
         public User RenterUser { get; set; }
 
+        [Required]
         public int RentedBikeId { get; set; }
+
         public Bike RentedBike { get; set; }
 
         public decimal Price { get; set; }
         public bool IsDiscounted { get; set; }
 
+        [Required]
         public DateTime RentStartDate { get; set; }
+
+        [Required]
         public int RentHoursDuration { get; set; }
 
+        [Required]
+        [MaxLength(16)]
+        [MinLength(13)]
         public string CardNr { get; set; }
+
+        [Required]
+        [MaxLength(3)]
+        [MinLength(4)]
         public string CardCVC { get; set; }
+
+        [Required]
         public string CardExpMonth { get; set; }
+
+        [Required]
         public string CardExpYear { get; set; }
+
+        [Required]
+        [MinLength(25)]
         public string CardHolderName { get; set; }
 
         public string EditPIN { get; set; }

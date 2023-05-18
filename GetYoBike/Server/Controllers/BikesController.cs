@@ -180,7 +180,7 @@ namespace GetYoBike.Server.Controllers
             return Ok(availableBikes);
         }
 
-        [HttpPut("ChangeBikeType/{id}")]
+        [HttpPut("changeBikeType/{id}")]
         public async Task<IActionResult> ChangeBikeType(int id, int bikeTypeId)
         {
             _context.Bikes.Include(b => b.Type);

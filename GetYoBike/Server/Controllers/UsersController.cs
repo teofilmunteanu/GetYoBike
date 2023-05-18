@@ -117,6 +117,16 @@ namespace GetYoBike.Server.Controllers
             {
                 return Problem("Entity set 'DataContext.Users'  is null.");
             }
+
+            if (!user.ValidaterEmail())
+            {
+                return BadRequest("Invalid email!");
+            }
+            if (!user.ValidaterAge())
+            {
+                return BadRequest("User should be between 14 and 70 years old!");
+            }
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -197,25 +207,7 @@ namespace GetYoBike.Server.Controllers
             return Ok(user);
         }
 
-        //imi da ceva, nu schimba o informatie
-        [HttpGet("checkEmail")]
-        //ceea ce este in ghilimele este path-ul pe care trebuie sa l urmez 
-        public bool ValidaterEmail(string email)//o alta modalitate in care sa spun ca e valid/invalid mailul, adica sa scrie
-        {
-            if (email == null)
-                return false;
-            return email.Contains("@");//returneaza adresa care incepe cu "@"
-        }
-
-        [HttpGet("checkAge")]
-        public bool ValidaterAge(int age)
-        {
-            if (age <= 14 || age >= 70)
-                return false;
-            return true;
-        }
-
-        [HttpGet("FindUserByMail/{mail}")]
+        [HttpGet("findUserByMail/{mail}")]
         public async Task<IActionResult> FindUserByMail(string mail)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == mail);

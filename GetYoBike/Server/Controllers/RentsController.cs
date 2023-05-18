@@ -124,9 +124,6 @@ namespace GetYoBike.Server.Controllers
             return NoContent();
         }
 
-
-        //Error in API: No route matches the supplied values.
-
         // POST: api/Rents
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -134,23 +131,25 @@ namespace GetYoBike.Server.Controllers
         {
             Rent rent = ModelToEntity(rentModel);
 
-            if (!(rent.ValidateCardDate() && rent.ValidateCardholderName() &&
-                rent.ValidateCardNumber() && rent.ValidateCVC()))
-            {
-                return BadRequest("Invalid card! Payment refused.");
-            }
-
-            rent.EditPIN = generatePIN(rent.RenterUserId);
-
             if (_context.Rents == null)
             {
                 return Problem("Entity set 'DataContext.Rents'  is null.");
             }
+
+            if (!(rent.ValidateCardDate() && rent.ValidateCardholderName() &&
+                rent.ValidateCardNumber() && rent.ValidateCVC()))
+            {
+                return BadRequest("Invalid card details! Payment refused.");
+            }
+
+            rent.EditPIN = generatePIN(rent.RenterUserId);
+
             _context.Rents.Add(rent);
             await _context.SaveChangesAsync();
 
-            //after rent is loaded into context, price can be calculated based on bike type
+            //after rent is loaded into context, price can be calculated based on RentedBike's type
             CalculatePrice(rent);
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRent", new { id = rent.RenterUserId }, rent);
@@ -181,7 +180,7 @@ namespace GetYoBike.Server.Controllers
             return (_context.Rents?.Any(e => e.RenterUserId == id)).GetValueOrDefault();
         }
 
-        [HttpPut("ChangeDate{'id'}")]
+        [HttpPut("changeDate{'id'}")]
         public async Task<IActionResult> ChangeDate(int id, Rent rent)
         {
             //modific data, nu userii, deci inlocuiesc cu rents si lucrez pe rents
@@ -200,7 +199,7 @@ namespace GetYoBike.Server.Controllers
             return BadRequest("Invalid rent start date.");
         }
 
-        [HttpPut("ChangeDuration/{id}")]
+        [HttpPut("changeDuration/{id}")]
         public async Task<IActionResult> ChangeDuration(int id, [BindRequired] int duration)
         {
             Rent rent = await _context.Rents.FindAsync(id);
@@ -216,7 +215,7 @@ namespace GetYoBike.Server.Controllers
             return Ok("Duration updated successfully");
         }
 
-        [HttpGet("GetRentsOfUser/{id}")]
+        [HttpGet("getRentsOfUser/{id}")]
         public async Task<ActionResult<IEnumerable<UserModel>>> GetRentsOfUser(int id)
         {
             User user = await _context.Users.Include(u => u.Rents).Where(u => u.Id == id).FirstAsync();
