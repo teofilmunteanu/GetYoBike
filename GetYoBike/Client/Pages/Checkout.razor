@@ -13,22 +13,22 @@
 
     <div class="left">
 
-        <form action="" method="post" id="formContainer">
+        <form action="" method="post" id="formContainer" @onsubmit="ConfirmRent">
             <div class="username">
                 <div class="cardnr-grid">
                     <label for="Card Number" class="formLabel">Card Number</label>
                     <br />
-                    <input type="number" name="Card Number" id="cardnumber" class="cardnr" @bind="NrCard">
+                    <input type="text" name="Card Number" id="cardnumber" class="cardnr" @bind="NrCard">
                 </div>
                 <div class="firstname-grid">
                     <label for="first Name" class="formLabel">CVC</label>
                     <br />
-                    <input type="text" name="First Name" id="firstname" class="cvc" @bind="FirstName">
+                    <input type="text" name="First Name" id="firstname" class="cvc" @bind="CardCVC">
                 </div>
                 <div class="month-grid">
                     <label for="month" class="formLabel">Card Expiration Date</label>
                     <br />
-                    <input type="month" name="month" id="month" class="month" placeholder="month" @bind="Month">
+                    <input type="month" name="month" id="month" class="month" placeholder="month" @bind="CardExpDate">
                 </div>
                 <div class="cardname-grid">
                     <label for="cardname" class="formLabel">Name On Card</label>
@@ -36,6 +36,7 @@
                     <input type="cardname" name="cardname" id="cardname" class="cardname" @bind="CardName">
                 </div>
 
+                <button type="submit" >Submit</button>
                 <br />
             </div>
         </form>
@@ -52,7 +53,7 @@
         <total class="total">
             <span>Total: @Price lei</span>
         </total>
-        <button class="button" style="vertical-align:middle">
+        <button class="button" style="vertical-align:middle" >
             <span>Checkout </span>
         </button>
     </div>
@@ -81,13 +82,17 @@
 
     public decimal Price { get; set; } = 0;
 
-    public int NrCard { get; set; } = 0;
+    public string NrCard { get; set; } = "";
+
+    public string CardCVC { get; set; } = "";
 
     public string FirstName { get; set; } = "";
 
-    public DateTime Month { get; set; }
+    public DateTime CardExpDate { get; set; }
 
     public string CardName { get; set; } = "";
+
+    public string message { get; set; } = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -111,6 +116,53 @@
         if (RentDuration > 4)
         {
             Price *= 0.85m;
+        }
+    }
+
+    public async Task ConfirmRent()
+    {
+        DateTime rentStartDate;
+        DateTime.TryParse(RentDate, out rentStartDate);
+
+        List<BikeModel> availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?dateTime=" + rentStartDate + "&duration=" + RentDuration); 
+        int randBikeId = new Random().Next(1, availableBikes.Count);
+        BikeModel bike = availableBikes[randBikeId];
+
+        if(availableBikes.Count > 0)
+        {
+            RentModel rent = new RentModel()
+                {
+                    UserID = this.UserId,
+                    BikeID = bike.Id,
+                    RentStartDate = rentStartDate,
+                    RentHoursDuration = this.RentDuration,
+                    CardNr = this.NrCard.ToString(),
+                    CardCVC = this.CardCVC,
+                    CardExpMonth = CardExpDate.Month.ToString(),
+                    CardExpYear = CardExpDate.Year.ToString(),
+                    CardHolderName = this.CardName,
+                    EditPIN = ""
+                };
+            var response = await Http.PostAsJsonAsync("/api/Rents/", rent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NavManager.NavigateTo($"/thanks?id={rent.UserID}&EditPIN={rent.EditPIN}");
+            }
+            else
+            {
+                message = response.Content.ReadAsStringAsync().Result;
+            }
+        }
+        else
+        {
+            message = "No bikes available";
+        }
+
+
+        if (message != "")
+        {
+            await JsRuntime.InvokeVoidAsync("alert", message);
         }
     }
 
