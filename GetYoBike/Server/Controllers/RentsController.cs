@@ -4,7 +4,6 @@ using GetYoBike.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -135,11 +134,23 @@ namespace GetYoBike.Server.Controllers
         {
             Rent rent = ModelToEntity(rentModel);
 
+            if (!(rent.ValidateCardDate() && rent.ValidateCardholderName() &&
+                rent.ValidateCardNumber() && rent.ValidateCVC()))
+            {
+                return BadRequest("Invalid card! Payment refused.");
+            }
+
+            rent.EditPIN = generatePIN(rent.RenterUserId);
+
             if (_context.Rents == null)
             {
                 return Problem("Entity set 'DataContext.Rents'  is null.");
             }
             _context.Rents.Add(rent);
+            await _context.SaveChangesAsync();
+
+            //after rent is loaded into context, price can be calculated based on bike type
+            CalculatePrice(rent);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetRent", new { id = rent.RenterUserId }, rent);
@@ -170,109 +181,6 @@ namespace GetYoBike.Server.Controllers
             return (_context.Rents?.Any(e => e.RenterUserId == id)).GetValueOrDefault();
         }
 
-        private void DiscountApplier(Rent rent)
-        {
-            if (rent.RentHoursDuration > 4 && !rent.IsDiscounted)
-            {
-                rent.Price = rent.Price * 0.85m;
-                //aplic discount-ul de 15%, 100-15=85
-                rent.IsDiscounted = true;
-            }
-        }
-
-        private bool ValidateCardNumber(string cardNumber)
-        {
-            //nr cardului e intre 13 si 16 cifre (1)
-            if (cardNumber.Length < 13 || cardNumber.Length > 16)
-            {
-                return false;
-            }
-            // caracterul c(adica nr meu din card) este chiar o cifra, verific daca are caractere speciale in acele cifre
-            foreach (char c in cardNumber)
-            {
-                if (!char.IsDigit(c))
-                    return false;
-            }
-            return true;
-        }
-
-        private bool ValidateCardDate(string cardDate)
-        {
-            //fac parse la card date string si l transform intr-un obiect de tipul DateTime 
-            DateTime expirationDate;
-            if (!DateTime.TryParseExact(cardDate, "MM/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out expirationDate))
-                return false;
-            // aflu data curenta in care ne aflam
-            DateTime currentDate = DateTime.Now;
-            // compar datile
-            if (expirationDate < currentDate)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        private bool ValidateCardholderName(string cardName)
-        {
-            //verific daca numele e empty sau nu
-            if (string.IsNullOrWhiteSpace(cardName))
-            {
-                return false;
-            }
-            // verific daca numele contine caractere speciale
-            foreach (char c in cardName)
-            {
-                if (!char.IsLetter(c) && c != ' ' && c != '-')
-                {
-                    return false;
-                }
-            }
-            // !!maximul de caractere acceptate este 25!!
-            if (cardName.Length > 26)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        private bool ValidateCVC(string CVC)
-        {
-            //verific daca CVC-ul e null
-            if (string.IsNullOrWhiteSpace(CVC))
-            {
-                return false;
-            }
-
-            // verific daca CVC-ul e facut doar din numere
-            foreach (char c in CVC)
-            {
-                if (!char.IsDigit(c))
-                {
-                    return false;
-                }
-            }
-
-            //aparent, CVC-ul poate fi de lungime 3 sau 4
-            if (CVC.Length < 3 || CVC.Length > 4)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        private bool DateCheck(Rent rent)
-        {
-            DateTime currentDate = DateTime.Now;
-            if (rent.RentStartDate < currentDate)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         [HttpPut("ChangeDate{'id'}")]
         public async Task<IActionResult> ChangeDate(int id, Rent rent)
         {
@@ -282,29 +190,14 @@ namespace GetYoBike.Server.Controllers
             {
                 return NotFound();
             }
-            if (!DateCheck(rent))
+            if (!rent.DateCheck())
             {
+
                 ToUpdateRent.RentStartDate = rent.RentStartDate;
                 await _context.SaveChangesAsync();
                 return Ok(ToUpdateRent);
             }
             return BadRequest("Invalid rent start date.");
-        }
-
-        private int generatePIN()//creez un pin random intre 6 cifre 
-        {
-            Random generator = new Random();
-            int PIN;
-            do
-            {
-                PIN = generator.Next(100000, 999999);
-            } while (IsPINTaken(PIN));
-            return PIN;
-        }
-
-        private bool IsPINTaken(int pin)//returneaza true daca PIN-ul e deja luat
-        {
-            return true;
         }
 
         [HttpPut("ChangeDuration/{id}")]
@@ -323,19 +216,6 @@ namespace GetYoBike.Server.Controllers
             return Ok("Duration updated successfully");
         }
 
-        [HttpGet("GetPrice/{id}")]
-        public async Task<IActionResult> CalculatePrice(int id)
-        {
-            Rent rent = await _context.Rents.FindAsync(id);
-            if (rent == null)
-            {
-                return NotFound();
-            }
-            rent.Price = rent.RentHoursDuration * rent.RentedBike.Type.Price;
-            DiscountApplier(rent);
-            return Ok("Duration updated successfully");
-        }
-
         [HttpGet("GetRentsOfUser/{id}")]
         public async Task<ActionResult<IEnumerable<UserModel>>> GetRentsOfUser(int id)
         {
@@ -347,6 +227,32 @@ namespace GetYoBike.Server.Controllers
             }
 
             return Ok((user.Rents).Select(EntityToModel).ToList());
+        }
+
+
+        private void CalculatePrice(Rent rent)
+        {
+            var rent1 = _context.Rents.Include(r => r.RentedBike).ThenInclude(b => b.Type).Where(r => r.Id == rent.Id).FirstOrDefault();
+            rent.Price = rent.RentHoursDuration * rent1.RentedBike.Type.Price;
+            rent.ApplyDiscount();
+        }
+
+        private string generatePIN(int id)//creez un pin random de 6 cifre pt user cu id
+        {
+            Random generator = new Random();
+            int PIN;
+            do
+            {
+                PIN = generator.Next(100000, 1000000);
+            } while (IsPINTakenForUser(PIN.ToString(), id));
+
+            return PIN.ToString();
+        }
+
+        private bool IsPINTakenForUser(string pin, int id)//returneaza true daca PIN-ul e deja luat
+        {
+            _context.Rents.Include(r => r.RenterUser);
+            return _context.Rents.Where(r => r.RenterUser.Id == id).Any(r => r.EditPIN == pin);
         }
     }
 }
