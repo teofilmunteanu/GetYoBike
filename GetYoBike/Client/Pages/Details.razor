@@ -3,6 +3,7 @@
 
 @inject IJSRuntime JsRuntime
 @using GetYoBike.Shared.Models;
+@using System.Text.Json;
 @inject NavigationManager NavManager
 @inject HttpClient Http
 
@@ -100,7 +101,11 @@
     }
 
     private void SetPrice()
-    {    
+    {
+        /* MOCKED */
+        RentDuration = 1;
+        /**********/
+
         if(RentDuration > 0)
         {
             Price = RentDuration * pricePerH;
@@ -114,15 +119,19 @@
 
     private async void SendToCheckout()
     {
+        Price = 1;
         if(Price > 0)
         {
             UserModel user = new UserModel
                 {
-                    Id = 89,
-                    Email = this.Email,
-                    LastName = this.LastName,
-                    FirstName = this.FirstName,
-                    Age = this.Age
+                    //Email = this.Email,
+                    //LastName = this.LastName,
+                    //FirstName = this.FirstName,
+                    //Age = this.Age
+                    Email = "mock@email.com",
+                    LastName = "last name",
+                    FirstName = "first name",
+                    Age = 21
                 };
 
             var response = await Http.PostAsJsonAsync("/api/Users/", user);
@@ -131,7 +140,13 @@
             {
                 string dateString = RentDate.ToString();
 
-                NavManager.NavigateTo($"/checkout?id={user.Id}&type={bikeTypeNr}&date={dateString}&duration={RentDuration}");
+                var responseContent = response.Content.ReadAsStringAsync().Result;
+                var createdUser = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                NavManager.NavigateTo($"/checkout?id={createdUser.Id}&type={bikeTypeNr}&date={dateString}&duration={RentDuration}");
             }
             else
             {
