@@ -146,7 +146,7 @@
                     PropertyNameCaseInsensitive = true
                 });
 
-                NavManager.NavigateTo($"/checkout?id={createdUser.Id}&type={bikeTypeNr}&date={dateString}&duration={RentDuration}");
+                NavManager.NavigateTo($"/checkout?userId={createdUser.Id}&type={bikeTypeNr}&date={dateString}&duration={RentDuration}");
             }
             else
             {

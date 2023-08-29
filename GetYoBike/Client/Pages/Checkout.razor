@@ -13,7 +13,8 @@
 
     <div class="left">
 
-        <form action="" method="post" id="formContainer" @onsubmit="ConfirmRent">
+        <form action="" method="post" id="formContainer">
+            @*@onsubmit="ConfirmRent"*@
             <div class="username">
                 <div class="cardnr-grid">
                     <label for="Card Number" class="formLabel">Card Number</label>
@@ -36,8 +37,8 @@
                     <input type="cardname" name="cardname" id="cardname" class="cardname" @bind="CardName">
                 </div>
 
-                <button type="submit" >Submit</button>
-                <br />
+                @*<button type="submit" >Submit</button>
+                <br />*@
             </div>
         </form>
         <div class="backbutton" @onclick="BackToDetails">
@@ -53,13 +54,13 @@
         <total class="total">
             <span>Total: @Price lei</span>
         </total>
-        <button class="button" style="vertical-align:middle" >
+        <button class="button" style="vertical-align:middle" @onclick="ConfirmRent">
             <span>Checkout </span>
         </button>
     </div>
 </div>
 
-@* NavManager.NavigateTo($"/checkout?id={user.Id}&type={bikeTypeNr}&date={dateString}&duration={RentDuration}"); *@
+@*NavManager.NavigateTo($"/checkout?id={user.Id}&type={bikeTypeNr}&date={dateString}&duration={RentDuration}");*@
 
 @code {
     [Parameter]
