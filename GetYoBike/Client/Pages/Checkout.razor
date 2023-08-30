@@ -128,21 +128,7 @@
         try
         {
             availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?dateTime=" + RentDate + "&duration=" + RentDuration);
-        }
-        catch(HttpRequestException e)
-        {
-            if(e.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                await JsRuntime.InvokeVoidAsync("alert", "No bikes available");
-            }
-            else
-            {
-                await JsRuntime.InvokeVoidAsync("alert", e.Message);
-            }    
-        }
 
-        if(availableBikes.Count > 0)
-        {
             int randBikeId = new Random().Next(0, availableBikes.Count - 1);
             BikeModel bike = availableBikes[randBikeId];
 
@@ -166,8 +152,7 @@
 
             //the post request isn't done until the later navigate
             var response = await Http.PostAsJsonAsync("/api/Rents/", rent);
-            //RentModel createdRent = await Http.GetFromJsonAsync<RentModel>("api/Rents/" + rent.Id);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 NavManager.NavigateTo($"/thanks?id={rent.UserID}&EditPIN={rent.EditPIN}");
@@ -178,9 +163,20 @@
                 await JsRuntime.InvokeVoidAsync("alert", message);
             }
         }
-        else
+        catch(HttpRequestException e)
         {
-            //message = "No bikes available";
+            if(e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "No bikes available");
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", e.Message);
+            }    
+        }
+        catch(Exception e)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", e.Message);
         }
     }
 

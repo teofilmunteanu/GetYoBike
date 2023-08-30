@@ -133,7 +133,7 @@ namespace GetYoBike.Server.Controllers
 
             if (_context.Rents == null)
             {
-                return Problem("Entity set 'DataContext.Rents'  is null.");
+                return Problem("Entity set 'DataContext.Rents' is null.");
             }
 
             if (rent.RentHoursDuration > 48)
