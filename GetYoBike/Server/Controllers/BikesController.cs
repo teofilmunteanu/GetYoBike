@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -153,7 +154,8 @@ namespace GetYoBike.Server.Controllers
             List<Rent> rentsInInterval = new List<Rent>();
             List<Bike> availableBikes = new List<Bike>();
 
-            if (DateTime.TryParse(dateTime, out dateTimeFormatted))
+            bool dateParseSuccessfuly = DateTime.TryParseExact(dateTime, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTimeFormatted);
+            if (dateParseSuccessfuly)
             {
                 List<int> unavailableBikesIds = new List<int>();
 
@@ -164,12 +166,11 @@ namespace GetYoBike.Server.Controllers
                 activeRents.ForEach(r => unavailableBikesIds.Add(r.RentedBike.Id));
 
                 //verifica daca vreunul din renturi contine bike-ul acesta                
-
                 availableBikes = _context.Bikes.Where(b => !(unavailableBikesIds.Contains(b.Id))).ToList();
             }
             else
             {
-                throw new ArgumentException("Invalid date");
+                return BadRequest("Invalid rent date");
             }
 
             if (availableBikes.IsNullOrEmpty())

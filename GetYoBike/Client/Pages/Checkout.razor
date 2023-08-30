@@ -2,6 +2,7 @@
 
 @inject IJSRuntime JsRuntime
 @using GetYoBike.Shared.Models;
+@using System.Globalization;
 @inject NavigationManager NavManager
 @inject HttpClient Http
 
@@ -93,7 +94,7 @@
 
     public string CardName { get; set; } = "";
 
-    public string message { get; set; } = "";
+    //public string message { get; set; } = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -122,15 +123,33 @@
 
     public async Task ConfirmRent()
     {
-        DateTime rentStartDate;
-        DateTime.TryParse(RentDate, out rentStartDate);
+        List<BikeModel> availableBikes = new();
 
-        List<BikeModel> availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?dateTime=" + rentStartDate + "&duration=" + RentDuration); 
-        int randBikeId = new Random().Next(1, availableBikes.Count);
-        BikeModel bike = availableBikes[randBikeId];
+        try
+        {
+            availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?dateTime=" + RentDate + "&duration=" + RentDuration);
+        }
+        catch(HttpRequestException e)
+        {
+            if(e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "No bikes available");
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", e.Message);
+            }    
+        }
 
         if(availableBikes.Count > 0)
         {
+            int randBikeId = new Random().Next(0, availableBikes.Count - 1);
+            BikeModel bike = availableBikes[randBikeId];
+
+            DateTime rentStartDate;
+            DateTime.TryParseExact(RentDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentStartDate);
+
+
             RentModel rent = new RentModel()
                 {
                     UserID = this.UserId,
@@ -144,26 +163,24 @@
                     CardHolderName = this.CardName,
                     EditPIN = ""
                 };
-            var response = await Http.PostAsJsonAsync("/api/Rents/", rent);
 
+            //the post request isn't done until the later navigate
+            var response = await Http.PostAsJsonAsync("/api/Rents/", rent);
+            //RentModel createdRent = await Http.GetFromJsonAsync<RentModel>("api/Rents/" + rent.Id);
+            
             if (response.IsSuccessStatusCode)
             {
                 NavManager.NavigateTo($"/thanks?id={rent.UserID}&EditPIN={rent.EditPIN}");
             }
             else
             {
-                message = response.Content.ReadAsStringAsync().Result;
+                string message = response.Content.ReadAsStringAsync().Result;
+                await JsRuntime.InvokeVoidAsync("alert", message);
             }
         }
         else
         {
-            message = "No bikes available";
-        }
-
-
-        if (message != "")
-        {
-            await JsRuntime.InvokeVoidAsync("alert", message);
+            //message = "No bikes available";
         }
     }
 

@@ -102,10 +102,6 @@
 
     private void SetPrice()
     {
-        /* MOCKED */
-        RentDuration = 1;
-        /**********/
-
         if(RentDuration > 0)
         {
             Price = RentDuration * pricePerH;
@@ -119,7 +115,11 @@
 
     private async void SendToCheckout()
     {
+        /* MOCKED */
+        RentDuration = 1;
         Price = 1;
+        /**********/
+        
         if(Price > 0)
         {
             UserModel user = new UserModel
@@ -138,7 +138,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                string dateString = RentDate.ToString();
+                string dateString = RentDate.ToString("yyyy-MM-dd");
 
                 var responseContent = response.Content.ReadAsStringAsync().Result;
                 var createdUser = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
