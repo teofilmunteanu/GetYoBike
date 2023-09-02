@@ -3,8 +3,10 @@
 @inject IJSRuntime JsRuntime
 @using GetYoBike.Shared.Models;
 @using System.Globalization;
+@using System.Text.Json;
 @inject NavigationManager NavManager
 @inject HttpClient Http
+@inject Services.RentService RentService
 
 @*<header>
     <b><b style="color:#6594EF;">Rent City Bike</b> - Payment</b>
@@ -108,6 +110,11 @@
                 break;
         }
 
+        SetPrice();
+    }
+
+    private async void SetPrice()
+    {
         BikeTypeModel bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + BikeTypeNr);
 
         if (RentDuration > 0)
@@ -121,20 +128,24 @@
         }
     }
 
+    private async Task<BikeModel> GetAnAvailableBike()
+    {
+        List<BikeModel> availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?dateTime=" + RentDate + "&duration=" + RentDuration);
+
+        int randBikeId = new Random().Next(0, availableBikes.Count - 1);
+        BikeModel bike = availableBikes[randBikeId];
+
+        return bike;
+    }
+
     public async Task ConfirmRent()
     {
-        List<BikeModel> availableBikes = new();
-
         try
         {
-            availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?dateTime=" + RentDate + "&duration=" + RentDuration);
-
-            int randBikeId = new Random().Next(0, availableBikes.Count - 1);
-            BikeModel bike = availableBikes[randBikeId];
+            BikeModel bike = await GetAnAvailableBike();
 
             DateTime rentStartDate;
             DateTime.TryParseExact(RentDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentStartDate);
-
 
             RentModel rent = new RentModel()
                 {
@@ -150,12 +161,14 @@
                     EditPIN = ""
                 };
 
-            //the post request isn't done until the later navigate
+            //obs: the post request isn't done until the later navigate
             var response = await Http.PostAsJsonAsync("/api/Rents/", rent);
+
+            RentService.SetRent(rent);
 
             if (response.IsSuccessStatusCode)
             {
-                NavManager.NavigateTo($"/thanks?id={rent.UserID}&EditPIN={rent.EditPIN}");
+                NavManager.NavigateTo($"/thanks");
             }
             else
             {

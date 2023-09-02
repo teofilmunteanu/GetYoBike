@@ -1,4 +1,9 @@
 ﻿@page "/thanks"
+@using System.Text.Json;
+@using GetYoBike.Shared.Models;
+@inject Services.RentService RentService
+@inject IJSRuntime JsRuntime
+
 <div class="wraper">
     <div class="card">
         <div>
@@ -6,12 +11,12 @@
             <b>Thank you for renting a <span class="location">City</span> Bicycle!</b>
         </div><br><br>
         <div>
-            To edit the renting detals, please use the following PIN after <br> accessing your rents list on the homepahe through the email.
+            To edit the renting detals, please use the following PIN after <br> accessing your rents list on the homepage through the email.
         </div><br>
         <div class="box">
             <!-- Can use the class (email/pin) to extract from database, or do as u want -->
             <div>Rent Made on Email: <span class="email">exemplu@gmail.com</span></div><br>
-            <div>Rent Edit PIN: <span class="pin">123456</span></div>
+            <div>Rent Edit PIN: <span class="pin"> </span></div>
         </div>
         <div>
             <button class="home-button">Home</button>
@@ -20,5 +25,31 @@
 
 </div>
 @code {
-        
+    protected override async Task OnInitializedAsync()
+    {
+        //shouldnt store the whole rent cuz that gives away user info, 
+        // so only store bike id and user id, then find rent based on that, 
+        // to get the email of renter user and EditPIN
+
+        //or BETTER:
+        //from checkout, store in service bike id and user id
+        //on initialize, if service info is not null (that happens only once),
+        //search the rent by them, then store rent editpin and email in local storage
+        //else, if service info is null, get editpin and email from local storage
+
+        //If it's the first time the page is loaded, CurrentRent wouldn't be null
+        if(RentService.CurrentRent != null)
+        {
+            //search rent by BikeId, UserId, startdate, enddate (+hours)
+            //store email, pin, start date, end date (+hours) in local storage
+        }
+        else
+        {
+            //get email, pin, start date, end date (+hours) from local storage (or session)
+        }
+
+        //string serializedRent = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "currentRent");
+        //RentService.SetRent(JsonSerializer.Deserialize<RentModel>(serializedRent));
+        //await JsRuntime.InvokeVoidAsync("localStorage.setItem", "currentRent", JsonSerializer.Serialize(rent));
+    }
 }
