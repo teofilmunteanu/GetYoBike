@@ -11,43 +11,55 @@
     <b><b style="color:#6594EF;">Rent City Bike</b> - Details</b>
 </header>*@
 <Header Color="#6594EF" Title="Rent City Bike" Subtitle="Details"/>
-<div class="grid-container">
+<div id="grid-container">
     <div class="left">
 
-        <form action="" method="post" id="formContainer">
-            <div class="username">
-                <div class="lastname-grid">
+        <form action="" method="post">
+            <div id="div-container">
+                <div class="lastName-grid">
                     <label for="Last Name" class="formLabel">Last Name</label>
                     <br />
-                    <input type="text" name="Last Name" id="lastname" class="lastname" @bind="LastName">
+                    <input type="text" name="Last Name" class="lastName" @bind="LastName">
                 </div>
-                <div class="firstname-grid">
+                <div class="firstName-grid">
                     <label for="first Name" class="formLabel">First Name</label>
                     <br />
-                    <input type="text" name="First Name" id="firstname" class="firstname" @bind="FirstName">
+                    <input type="text" name="First Name" class="firstName" @bind="FirstName">
                 </div>
                 <div class="email-grid">
                     <label for="email" class="formLabel">Email</label>
                     <br />
-                    <input type="email" name="email" id="email" class="email" @bind="Email">
+                    <input type="email" name="email" class="email" @bind="Email">
                 </div>
                 <div class="age-grid">
                     <label for="Age" class="formLabel">Age</label>
                     <br />
-                    <input type="text" name="Age" id="age" class="age" @bind="Age">
+                    <input type="text" name="Age" class="age" @bind="Age">
                 </div>
-                <div class="rentstart-grid">
-                    <label for="rent" class="formLabel">Rent Start Date</label>
+                <div class="dateStart-grid">
+                    <label for="rent" class="formLabel">Start Date</label>
                     <br />
-                    <input type="date" id="rent" class="rentstart" @bind="RentDate"/>
+                    <input type="date" name="StartDate" class="rentDate"
+                           @bind="RentDateStart" @bind:after="SetPrice" />
                 </div>
-                <div class="duration-grid">
-                    <label for="duration" class="formLabel">Duration (in hours)</label>
+                <div class="timeStart-grid">
+                    <label for="duration" class="formLabel">Start Time</label>
                     <br />
-                    <input type="number" name="duration" id="duration" class="duration" placeholder="hh"
-                           @bind="RentDuration" @bind:after="SetPrice">
+                    <input type="time" name="StartTime" class="rentTime" placeholder="hh"
+                           @bind="RentTimeStart" @bind:after="SetPrice">
                 </div>
-
+                <div class="dateEnd-grid">
+                    <label for="rent" class="formLabel">End Date</label>
+                    <br />
+                    <input type="date" name="EndDate" class="rentDate" 
+                        @bind="RentDateEnd" @bind:after="SetPrice" />
+                </div>
+                <div class="timeEnd-grid">
+                    <label for="duration" class="formLabel">End Time</label>
+                    <br />
+                    <input type="time" name="EndTime" class="rentTime" placeholder="hh"
+                           @bind="RentTimeEnd" @bind:after="SetPrice">
+                </div>
                 <br />
             </div>
         </form>
@@ -75,14 +87,17 @@
     public decimal Price { get; set; } = 0;
     private decimal pricePerH { get; set; }
 
-    public DateTime RentDate { get; set; } = DateTime.Now;
-    public int RentDuration { get; set; } = 0;
+    public DateOnly RentDateStart { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+    public DateOnly RentDateEnd { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+    public TimeOnly RentTimeStart { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
+    public TimeOnly RentTimeEnd { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
     public string LastName { get; set; } = "";
     public string FirstName { get; set; } = "";
     public string Email { get; set; } = "";
     public int Age { get; set; }
 
     public string message = "";
+    decimal rentDuration;
 
     protected override async Task OnInitializedAsync()
     {
@@ -102,25 +117,33 @@
 
     private void SetPrice()
     {
-        if(RentDuration > 0)
-        {
-            Price = RentDuration * pricePerH;
-        }
+        DateTime dateTimeStart = RentDateStart.ToDateTime(new TimeOnly(RentTimeStart.Hour, RentTimeStart.Minute, 0));
+        DateTime dateTimeEnd = RentDateEnd.ToDateTime(new TimeOnly(RentTimeEnd.Hour, RentTimeEnd.Minute, 0));
 
-        if(RentDuration > 4)
+        rentDuration = (decimal)((dateTimeEnd - dateTimeStart).TotalHours);
+        rentDuration = Math.Round(rentDuration, 2);
+
+        if (rentDuration >= 1)
         {
-            Price *= 0.85m;
+            Price = rentDuration * pricePerH;
+
+            if (rentDuration > 4)
+            {
+                Price *= 0.85m;
+            }
+
+            Price = Math.Round(Price, 2);
         }
     }
 
     private async void SendToCheckout()
     {
         /* MOCKED */
-        RentDuration = 1;
-        Price = 1;
+        //RentTimeEnd.AddHours(2); 
+        
         /**********/
         
-        if(Price > 0)
+        if (rentDuration >= 1)
         {
             UserModel user = new UserModel
                 {
@@ -138,7 +161,10 @@
 
             if (response.IsSuccessStatusCode)
             {
-                string dateString = RentDate.ToString("yyyy-MM-dd");
+                string dateStartString = RentDateStart.ToString("yyyy-MM-dd");
+                string dateEndString = RentDateEnd.ToString("yyyy-MM-dd");
+                string timeStartString = RentTimeStart.ToString();
+                string timeEndString = RentTimeEnd.ToString();
 
                 var responseContent = response.Content.ReadAsStringAsync().Result;
                 var createdUser = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
@@ -146,7 +172,7 @@
                     PropertyNameCaseInsensitive = true
                 });
 
-                NavManager.NavigateTo($"/checkout?userId={createdUser.Id}&type={bikeTypeNr}&date={dateString}&duration={RentDuration}");
+                NavManager.NavigateTo($"/checkout?userId={createdUser.Id}&type={bikeTypeNr}&startDate={dateStartString}&endDate={dateEndString}&startTime={timeStartString}&endTime={timeEndString}");
             }
             else
             {
@@ -155,7 +181,7 @@
         }
         else
         {
-            message = "Price cannot be 0";
+            message = "Rent duration must be at least one hour";
         }
 
         if(message != "")
