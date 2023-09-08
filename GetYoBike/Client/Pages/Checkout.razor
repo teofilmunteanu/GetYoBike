@@ -75,12 +75,20 @@
     public int BikeTypeNr { get; set; }
 
     [Parameter]
-    [SupplyParameterFromQuery(Name = "date")]
-    public string RentDate { get; set; }
+    [SupplyParameterFromQuery(Name = "startDate")]
+    public string StartDateString { get; set; }
 
     [Parameter]
-    [SupplyParameterFromQuery(Name = "duration")]
-    public int RentDuration { get; set; }
+    [SupplyParameterFromQuery(Name = "endDate")]
+    public string EndDateString { get; set; }
+
+    //[Parameter]
+    //[SupplyParameterFromQuery(Name = "startTime")]
+    //public string RentStartTime { get; set; }
+
+    //[Parameter]
+    //[SupplyParameterFromQuery(Name = "endTime")]
+    //public string RentEndTime { get; set; }
 
     public string SelectedImagePath { get; set; } = "";
 
@@ -117,25 +125,26 @@
     {
         BikeTypeModel bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + BikeTypeNr);
 
-        if (RentDuration > 0)
-        {
-            Price = RentDuration * bikeType.Price;
-        }
+        //if (RentDuration > 0)
+        //{
+        //    Price = RentDuration * bikeType.Price;
+        //}
 
-        if (RentDuration > 4)
-        {
-            Price *= 0.85m;
-        }
+        //if (RentDuration > 4)
+        //{
+        //    Price *= 0.85m;
+        //}
     }
 
     private async Task<BikeModel> GetAnAvailableBike()
     {
-        List<BikeModel> availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?dateTime=" + RentDate + "&duration=" + RentDuration);
+        //List<BikeModel> availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?dateTime=" + RentDate + "&duration=" + RentDuration);
 
-        int randBikeId = new Random().Next(0, availableBikes.Count - 1);
-        BikeModel bike = availableBikes[randBikeId];
+        //int randBikeId = new Random().Next(0, availableBikes.Count - 1);
+        //BikeModel bike = availableBikes[randBikeId];
 
-        return bike;
+        //return bike;
+        return null;
     }
 
     public async Task ConfirmRent()
@@ -144,15 +153,16 @@
         {
             BikeModel bike = await GetAnAvailableBike();
 
-            DateTime rentStartDate;
-            DateTime.TryParseExact(RentDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentStartDate);
+            DateTime rentStartDate, rentEndDate;
+            DateTime.TryParseExact(StartDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentStartDate);
+            DateTime.TryParseExact(EndDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentEndDate);
 
             RentModel rent = new RentModel()
                 {
                     UserID = this.UserId,
                     BikeID = bike.Id,
-                    RentStartDate = rentStartDate,
-                    RentHoursDuration = this.RentDuration,
+                    StartDate = rentStartDate,
+                    EndDate = rentEndDate,
                     CardNr = this.NrCard.ToString(),
                     CardCVC = this.CardCVC,
                     CardExpMonth = CardExpDate.Month.ToString(),

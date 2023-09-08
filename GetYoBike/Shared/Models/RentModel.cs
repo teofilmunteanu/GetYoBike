@@ -8,8 +8,8 @@
 
         public decimal Price { get; set; }
 
-        public DateTime RentStartDate { get; set; }
-        public int RentHoursDuration { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
 
         public string CardNr { get; set; }
         public string CardCVC { get; set; }

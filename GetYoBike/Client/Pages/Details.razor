@@ -2,10 +2,12 @@
 
 
 @inject IJSRuntime JsRuntime
+@using GetYoBike.Client.Services;
 @using GetYoBike.Shared.Models;
 @using System.Text.Json;
 @inject NavigationManager NavManager
 @inject HttpClient Http
+@inject Services.RentService RentSvc
 
 @*<header>
     <b><b style="color:#6594EF;">Rent City Bike</b> - Details</b>
@@ -40,25 +42,25 @@
                     <label for="rent" class="formLabel">Start Date</label>
                     <br />
                     <input type="date" name="StartDate" class="rentDate"
-                           @bind="RentDateStart" @bind:after="SetPrice" />
+                           @bind="RentStartDate" @bind:after="SetPrice" />
                 </div>
                 <div class="timeStart-grid">
                     <label for="duration" class="formLabel">Start Time</label>
                     <br />
                     <input type="time" name="StartTime" class="rentTime" placeholder="hh"
-                           @bind="RentTimeStart" @bind:after="SetPrice">
+                           @bind="RentStartTime" @bind:after="SetPrice">
                 </div>
                 <div class="dateEnd-grid">
                     <label for="rent" class="formLabel">End Date</label>
                     <br />
-                    <input type="date" name="EndDate" class="rentDate" 
-                        @bind="RentDateEnd" @bind:after="SetPrice" />
+                    <input type="date" name="EndDate" class="rentDate"
+                           @bind="RentEndDate" @bind:after="SetPrice" />
                 </div>
                 <div class="timeEnd-grid">
                     <label for="duration" class="formLabel">End Time</label>
                     <br />
                     <input type="time" name="EndTime" class="rentTime" placeholder="hh"
-                           @bind="RentTimeEnd" @bind:after="SetPrice">
+                           @bind="RentEndTime" @bind:after="SetPrice">
                 </div>
                 <br />
             </div>
@@ -87,17 +89,17 @@
     public decimal Price { get; set; } = 0;
     private decimal pricePerH { get; set; }
 
-    public DateOnly RentDateStart { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-    public DateOnly RentDateEnd { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-    public TimeOnly RentTimeStart { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
-    public TimeOnly RentTimeEnd { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
+    public DateOnly RentStartDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+    public DateOnly RentEndDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+    public TimeOnly RentStartTime { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
+    public TimeOnly RentEndTime { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
     public string LastName { get; set; } = "";
     public string FirstName { get; set; } = "";
     public string Email { get; set; } = "";
     public int Age { get; set; }
-
-    public string message = "";
-    decimal rentDuration;
+    
+    DateTime dateTimeStart;
+    DateTime dateTimeEnd;
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,34 +119,21 @@
 
     private void SetPrice()
     {
-        DateTime dateTimeStart = RentDateStart.ToDateTime(new TimeOnly(RentTimeStart.Hour, RentTimeStart.Minute, 0));
-        DateTime dateTimeEnd = RentDateEnd.ToDateTime(new TimeOnly(RentTimeEnd.Hour, RentTimeEnd.Minute, 0));
+        dateTimeStart = RentStartDate.ToDateTime(new TimeOnly(RentStartTime.Hour, RentStartTime.Minute, 0));
+        dateTimeEnd = RentEndDate.ToDateTime(new TimeOnly(RentEndTime.Hour, RentEndTime.Minute, 0));
+        RentSvc.SetDuration(dateTimeStart, dateTimeEnd);
 
-        rentDuration = (decimal)((dateTimeEnd - dateTimeStart).TotalHours);
-        rentDuration = Math.Round(rentDuration, 2);
-
-        if (rentDuration >= 1)
-        {
-            Price = rentDuration * pricePerH;
-
-            if (rentDuration > 4)
-            {
-                Price *= 0.85m;
-            }
-
-            Price = Math.Round(Price, 2);
-        }
+        RentSvc.CalculatePrice(RentSvc.DurationHours, pricePerH);
+        Price = RentSvc.Price;
     }
 
     private async void SendToCheckout()
     {
-        /* MOCKED */
-        //RentTimeEnd.AddHours(2); 
-        
-        /**********/
-        
-        if (rentDuration >= 1)
+        string message = "";
+
+        if (RentSvc.DurationHours >= RentService.MinRentDuration)
         {
+            //if email already used, assign this rent 
             UserModel user = new UserModel
                 {
                     //Email = this.Email,
@@ -161,10 +150,12 @@
 
             if (response.IsSuccessStatusCode)
             {
-                string dateStartString = RentDateStart.ToString("yyyy-MM-dd");
-                string dateEndString = RentDateEnd.ToString("yyyy-MM-dd");
-                string timeStartString = RentTimeStart.ToString();
-                string timeEndString = RentTimeEnd.ToString();
+                //string startDateString = RentStartDate.ToString("yyyy-MM-dd");
+                //string endDateString = RentEndDate.ToString("yyyy-MM-dd");
+                //string startTimeString = RentStartTime.ToString();
+                //string endTimeString = RentEndTime.ToString();
+                string startDateTimeString = dateTimeStart.ToString("yyyy-MM-dd-HH-mm");
+                string endDateTimeString = dateTimeEnd.ToString("yyyy-MM-dd-HH-mm");
 
                 var responseContent = response.Content.ReadAsStringAsync().Result;
                 var createdUser = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
@@ -172,7 +163,8 @@
                     PropertyNameCaseInsensitive = true
                 });
 
-                NavManager.NavigateTo($"/checkout?userId={createdUser.Id}&type={bikeTypeNr}&startDate={dateStartString}&endDate={dateEndString}&startTime={timeStartString}&endTime={timeEndString}");
+                //NavManager.NavigateTo($"/checkout?userId={createdUser.Id}&type={bikeTypeNr}&startDate={startDateString}&endDate={endDateString}&startTime={startTimeString}&endTime={endTimeString}");
+                NavManager.NavigateTo($"/checkout?userId={createdUser.Id}&type={bikeTypeNr}&startDate={startDateTimeString}&endDate={endDateTimeString}");
             }
             else
             {
