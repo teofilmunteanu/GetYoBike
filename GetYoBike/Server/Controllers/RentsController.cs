@@ -4,6 +4,7 @@ using GetYoBike.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace GetYoBike.Server.Controllers
 {
@@ -28,8 +29,8 @@ namespace GetYoBike.Server.Controllers
                 RenterUserId = bikeTypeModel.UserID,
                 RentedBikeId = bikeTypeModel.BikeID,
                 Price = bikeTypeModel.Price,
-                RentStartDate = bikeTypeModel.RentStartDate,
-                RentHoursDuration = bikeTypeModel.RentHoursDuration,
+                StartDate = bikeTypeModel.StartDate,
+                EndDate = bikeTypeModel.EndDate,
                 CardNr = bikeTypeModel.CardNr,
                 CardCVC = bikeTypeModel.CardCVC,
                 CardExpMonth = bikeTypeModel.CardExpMonth,
@@ -47,8 +48,8 @@ namespace GetYoBike.Server.Controllers
                 UserID = rent.RenterUserId,
                 BikeID = rent.RentedBikeId,
                 Price = rent.Price,
-                RentStartDate = rent.RentStartDate,
-                RentHoursDuration = rent.RentHoursDuration,
+                StartDate = rent.StartDate,
+                EndDate = rent.EndDate,
                 CardNr = rent.CardNr,
                 CardCVC = rent.CardCVC,
                 CardExpMonth = rent.CardExpMonth,
@@ -56,6 +57,12 @@ namespace GetYoBike.Server.Controllers
                 CardHolderName = rent.CardHolderName,
                 EditPIN = rent.EditPIN
             };
+        }
+
+        decimal GetDuration(Rent rent)
+        {
+            decimal DurationHours = (decimal)((rent.EndDate - rent.StartDate).TotalHours);
+            return DurationHours;
         }
 
         // GET: api/Rents
@@ -88,6 +95,40 @@ namespace GetYoBike.Server.Controllers
             }
 
             return Ok(EntityToModel(rent));
+        }
+
+        // GET: api/Rents/
+        [HttpGet("getRentByDates")]
+        public async Task<ActionResult<RentModel>> GetRent([BindRequired] int userId, [BindRequired] int bikeId, [BindRequired] string startDateTime, [BindRequired] string endDateTime)
+        {
+            if (_context.Rents == null)
+            {
+                return NotFound();
+            }
+
+            DateTime startDateFormatted;
+            DateTime endDateFormatted;
+            bool startDateParseSuccessfuly = DateTime.TryParseExact(startDateTime, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out startDateFormatted);
+            bool endDateParseSuccessfuly = DateTime.TryParseExact(endDateTime, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out endDateFormatted);
+
+            if (startDateParseSuccessfuly && endDateParseSuccessfuly)
+            {
+                //List<Rent> rentsWithBikes = await _context.Rents.Include(r => r.RentedBike).ToListAsync();
+                Rent rent = _context.Rents.Where(
+                    r => r.RenterUserId == userId && r.RentedBikeId == bikeId && r.StartDate == startDateFormatted && r.EndDate == endDateFormatted
+                ).FirstOrDefault();
+
+                if (rent == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(EntityToModel(rent));
+            }
+            else
+            {
+                return BadRequest("Invalid rent dates");
+            }
         }
 
         // PUT: api/Rents/5
@@ -136,7 +177,7 @@ namespace GetYoBike.Server.Controllers
                 return Problem("Entity set 'DataContext.Rents' is null.");
             }
 
-            if (rent.RentHoursDuration > 48)
+            if (GetDuration(rent) > 48)
             {
                 return BadRequest("Rent can't be longer than 48h");
             }
@@ -185,40 +226,25 @@ namespace GetYoBike.Server.Controllers
             return (_context.Rents?.Any(e => e.RenterUserId == id)).GetValueOrDefault();
         }
 
-        [HttpPut("changeDate{'id'}")]
-        public async Task<IActionResult> ChangeDate(int id, Rent rent)
-        {
-            //modific data, nu userii, deci inlocuiesc cu rents si lucrez pe rents
-            var ToUpdateRent = await _context.Rents.FindAsync(id);
-            if (ToUpdateRent == null)
-            {
-                return NotFound();
-            }
-            if (!rent.DateCheck())
-            {
-
-                ToUpdateRent.RentStartDate = rent.RentStartDate;
-                await _context.SaveChangesAsync();
-                return Ok(ToUpdateRent);
-            }
-            return BadRequest("Invalid rent start date.");
-        }
-
-        [HttpPut("changeDuration/{id}")]
-        public async Task<IActionResult> ChangeDuration(int id, [BindRequired] int duration)
-        {
-            Rent rent = await _context.Rents.FindAsync(id);
-            if (rent == null)
-            {
-                return NotFound();
-            }
-            if (duration <= 0)
-            {
-                return BadRequest("Duration should be more than 0");
-            }
-            rent.RentHoursDuration = duration;
-            return Ok("Duration updated successfully");
-        }
+        /// handle all changes from a single put, or make separate ones?
+        //[HttpPut("changeDates{'id'}")]
+        //public async Task<IActionResult> ChangeDates(int id, Rent rent)
+        //{
+        //    //modific data, nu userii, deci inlocuiesc cu rents si lucrez pe rents
+        //    var ToUpdateRent = await _context.Rents.FindAsync(id);
+        //    if (ToUpdateRent == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    if (rent.DateIsValid())
+        //    {
+        //        ToUpdateRent.StartDate = rent.StartDate;
+        //        ToUpdateRent.EndDate = rent.EndDate;
+        //        await _context.SaveChangesAsync();
+        //        return Ok(ToUpdateRent);
+        //    }
+        //    return BadRequest("Invalid rent dates.");
+        //}
 
         [HttpGet("getRentsOfUser/{id}")]
         public async Task<ActionResult<IEnumerable<UserModel>>> GetRentsOfUser(int id)
@@ -237,7 +263,7 @@ namespace GetYoBike.Server.Controllers
         private void CalculatePrice(Rent rent)
         {
             var rent1 = _context.Rents.Include(r => r.RentedBike).ThenInclude(b => b.Type).Where(r => r.Id == rent.Id).FirstOrDefault();
-            rent.Price = rent.RentHoursDuration * rent1.RentedBike.Type.Price;
+            rent.Price = GetDuration(rent) * rent1.RentedBike.Type.Price;
             rent.ApplyDiscount();
         }
 

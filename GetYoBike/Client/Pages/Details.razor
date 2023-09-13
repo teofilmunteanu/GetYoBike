@@ -42,25 +42,25 @@
                     <label for="rent" class="formLabel">Start Date</label>
                     <br />
                     <input type="date" name="StartDate" class="rentDate"
-                           @bind="RentStartDate" @bind:after="SetPrice" />
+                           @bind="RentStartDate" @bind:after="SetDatesAndPrice" />
                 </div>
                 <div class="timeStart-grid">
                     <label for="duration" class="formLabel">Start Time</label>
                     <br />
                     <input type="time" name="StartTime" class="rentTime" placeholder="hh"
-                           @bind="RentStartTime" @bind:after="SetPrice">
+                           @bind="RentStartTime" @bind:after="SetDatesAndPrice">
                 </div>
                 <div class="dateEnd-grid">
                     <label for="rent" class="formLabel">End Date</label>
                     <br />
                     <input type="date" name="EndDate" class="rentDate"
-                           @bind="RentEndDate" @bind:after="SetPrice" />
+                           @bind="RentEndDate" @bind:after="SetDatesAndPrice" />
                 </div>
                 <div class="timeEnd-grid">
                     <label for="duration" class="formLabel">End Time</label>
                     <br />
                     <input type="time" name="EndTime" class="rentTime" placeholder="hh"
-                           @bind="RentEndTime" @bind:after="SetPrice">
+                           @bind="RentEndTime" @bind:after="SetDatesAndPrice">
                 </div>
                 <br />
             </div>
@@ -117,7 +117,7 @@
         pricePerH = bikeType.Price;
     }
 
-    private void SetPrice()
+    private void SetDatesAndPrice()
     {
         dateTimeStart = RentStartDate.ToDateTime(new TimeOnly(RentStartTime.Hour, RentStartTime.Minute, 0));
         dateTimeEnd = RentEndDate.ToDateTime(new TimeOnly(RentEndTime.Hour, RentEndTime.Minute, 0));

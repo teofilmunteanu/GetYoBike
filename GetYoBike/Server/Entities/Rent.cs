@@ -12,17 +12,15 @@ namespace GetYoBike.Server.Entities
 
         [Required]
         public int RentedBikeId { get; set; }
-
         public Bike RentedBike { get; set; }
 
         public decimal Price { get; set; }
         public bool IsDiscounted { get; set; }
 
         [Required]
-        public DateTime RentStartDate { get; set; }
-
+        public DateTime StartDate { get; set; }
         [Required]
-        public int RentHoursDuration { get; set; }
+        public DateTime EndDate { get; set; }
 
         [Required]
         [MaxLength(16)]
@@ -48,7 +46,9 @@ namespace GetYoBike.Server.Entities
 
         public void ApplyDiscount()
         {
-            if (RentHoursDuration > 4 && !IsDiscounted)
+            decimal DurationHours = (decimal)((EndDate - StartDate).TotalHours);
+
+            if (DurationHours > 4 && !IsDiscounted)
             {
                 Price = Price * 0.85m;
                 //aplic discount-ul de 15%, 100-15=85
@@ -76,7 +76,7 @@ namespace GetYoBike.Server.Entities
         {
             //fac parse la card date string si l transform intr-un obiect de tipul DateTime 
             DateTime expirationDate;
-            
+
             if (!DateTime.TryParse(CardExpYear + "-" + CardExpMonth, out expirationDate))
             {
                 return false;
@@ -140,17 +140,10 @@ namespace GetYoBike.Server.Entities
             return true;
         }
 
-        public bool DateCheck()
+        public bool DateIsValid()
         {
             DateTime currentDate = DateTime.Now;
-            if (RentStartDate < currentDate)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return StartDate >= currentDate && EndDate > StartDate;
         }
     }
 }

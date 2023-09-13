@@ -1,8 +1,10 @@
 ﻿@page "/thanks"
 @using System.Text.Json;
 @using GetYoBike.Shared.Models;
-@inject Services.RentService RentService
+@using System.Globalization;
+@inject Services.RentService RentSvc
 @inject IJSRuntime JsRuntime
+@inject HttpClient Http
 
 <div class="wraper">
     <div class="card">
@@ -15,8 +17,8 @@
         </div><br>
         <div class="box">
             <!-- Can use the class (email/pin) to extract from database, or do as u want -->
-            <div>Rent Made on Email: <span class="email">exemplu@gmail.com</span></div><br>
-            <div>Rent Edit PIN: <span class="pin"> </span></div>
+            <div>Rent Made on Email: <span class="email">@Email</span></div><br>
+            <div>Rent Edit PIN: <span class="pin">@EditPIN</span></div>
         </div>
         <div>
             <button class="home-button">Home</button>
@@ -25,6 +27,9 @@
 
 </div>
 @code {
+    public string Email { get; set; }
+    public string EditPIN { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         //shouldnt store the whole rent cuz that gives away user info, 
@@ -38,9 +43,19 @@
         //else, if service info is null, get editpin and email from local storage
 
         //If it's the first time the page is loaded, CurrentRent wouldn't be null
-        if(RentService.CurrentRent != null)
+        if (RentSvc.CurrentRent != null)
         {
-            //search rent by BikeId, UserId, startdate, enddate (+hours)
+            string startDateTimeString = RentSvc.CurrentRent.StartDate.ToString("yyyy-MM-dd-HH-mm");
+            string endDateTimeString = RentSvc.CurrentRent.EndDate.ToString("yyyy-MM-dd-HH-mm");
+            int userId = RentSvc.CurrentRent.UserID;
+            int bikeId = RentSvc.CurrentRent.BikeID;
+
+            //search rent by BikeId, UserId, startdate, enddate
+            RentModel rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/getRentByDates?userId=" + userId + "&bikeId=" + bikeId + "&startDateTime=" + startDateTimeString + "&endDateTime=" + endDateTimeString);
+            UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
+            
+            Email = user.Email;
+            EditPIN = rent.EditPIN;
             //store email, pin, start date, end date (+hours) in local storage
         }
         else

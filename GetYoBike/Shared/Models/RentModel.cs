@@ -8,6 +8,8 @@
 
         public decimal Price { get; set; }
 
+        //eventual separi rent model pe start-date, start-time, end-date, end-time ca sa fie consistent
+        //cu ce are frontend-ul (dar ar tb dupa convertit intre ele si la trecerea ModelToEntity si invers)
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
