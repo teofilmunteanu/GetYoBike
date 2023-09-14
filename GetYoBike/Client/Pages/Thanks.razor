@@ -42,6 +42,10 @@
         //search the rent by them, then store rent editpin and email in local storage
         //else, if service info is null, get editpin and email from local storage
 
+        RentModel rent;
+        UserModel user;
+        //!!!!!!!!!!!!! pretty slow, maybe save the data directly in local?
+
         //If it's the first time the page is loaded, CurrentRent wouldn't be null
         if (RentSvc.CurrentRent != null)
         {
@@ -51,17 +55,21 @@
             int bikeId = RentSvc.CurrentRent.BikeID;
 
             //search rent by BikeId, UserId, startdate, enddate
-            RentModel rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/getRentByDates?userId=" + userId + "&bikeId=" + bikeId + "&startDateTime=" + startDateTimeString + "&endDateTime=" + endDateTimeString);
-            UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
-            
-            Email = user.Email;
-            EditPIN = rent.EditPIN;
-            //store email, pin, start date, end date (+hours) in local storage
+            rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/getRentByDates?userId=" + userId + "&bikeId=" + bikeId + "&startDateTime=" + startDateTimeString + "&endDateTime=" + endDateTimeString);
+
+            await JsRuntime.InvokeVoidAsync("localStorage.setItem", "rentId", JsonSerializer.Serialize(rent.Id));
         }
         else
         {
-            //get email, pin, start date, end date (+hours) from local storage (or session)
+            string rentIdString = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "rentId");
+            int rentId = int.Parse(rentIdString);
+            rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/" + rentId);
         }
+
+        user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
+
+        Email = user.Email;
+        EditPIN = rent.EditPIN;
 
         //string serializedRent = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "currentRent");
         //RentService.SetRent(JsonSerializer.Deserialize<RentModel>(serializedRent));
