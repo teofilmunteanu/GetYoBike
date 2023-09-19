@@ -32,20 +32,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        //shouldnt store the whole rent cuz that gives away user info, 
-        // so only store bike id and user id, then find rent based on that, 
-        // to get the email of renter user and EditPIN
-
-        //or BETTER:
-        //from checkout, store in service bike id and user id
-        //on initialize, if service info is not null (that happens only once),
-        //search the rent by them, then store rent editpin and email in local storage
-        //else, if service info is null, get editpin and email from local storage
-
-
-        string rentEditPIN = "";
-        string userEmail = "";
-
         //If it's the first time the page is loaded, CurrentRent wouldn't be null
         if (RentSvc.CurrentRent != null)
         {
@@ -58,29 +44,19 @@
             RentModel rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/getRentByDates?userId=" + userId + "&bikeId=" + bikeId + "&startDateTime=" + startDateTimeString + "&endDateTime=" + endDateTimeString);
             UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
 
-            rentEditPIN = rent.EditPIN;
-            userEmail = user.Email;
+            EditPIN = rent.EditPIN;
+            Email = user.Email;
 
-            //await JsRuntime.InvokeVoidAsync("localStorage.setItem", "rentId", JsonSerializer.Serialize(rent.Id));
             await JsRuntime.InvokeVoidAsync("localStorage.setItem", "rentEditPIN", JsonSerializer.Serialize(rent.EditPIN));
             await JsRuntime.InvokeVoidAsync("localStorage.setItem", "userEmail", JsonSerializer.Serialize(user.Email));
         }
         else
         {
-            rentEditPIN = (await JsRuntime.InvokeAsync<string>("localStorage.getItem", "rentEditPIN")).ToString();
-            userEmail = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "userEmail");
-            
-            // int rentId = int.Parse(rentEditPIN);
-            //rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/" + rentId);
+            string rentEditPIN_json = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "rentEditPIN");
+            EditPIN = JsonSerializer.Deserialize<string>(rentEditPIN_json);
+
+            string userEmail_json = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "userEmail");
+            Email = JsonSerializer.Deserialize<string>(userEmail_json);
         }
-
-        Email = rentEditPIN;
-        EditPIN = userEmail;
-        // Email = user.Email;
-        // EditPIN = rent.EditPIN;
-
-        //string serializedRent = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "currentRent");
-        //RentService.SetRent(JsonSerializer.Deserialize<RentModel>(serializedRent));
-        //await JsRuntime.InvokeVoidAsync("localStorage.setItem", "currentRent", JsonSerializer.Serialize(rent));
     }
 }
