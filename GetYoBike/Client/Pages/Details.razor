@@ -72,12 +72,14 @@
     </div>
 
     <div class="right-bottom">
-        <total class="total">
-            <span>Total: @Price lei</span>
-        </total>
-        <button class="button" style="vertical-align:middle" @onclick="SendToCheckout">
-            <span>Checkout </span>
-        </button>
+        <div class="checkoutItemsContainer">
+            <total class="total">
+                <span>Total: @Price lei</span>
+            </total>
+            <button class="button" @onclick="SendToCheckout">
+                <span>Checkout </span>
+            </button> 
+        </div>
     </div>
 </div>
 
@@ -89,20 +91,30 @@
     public decimal Price { get; set; } = 0;
     private decimal pricePerH { get; set; }
 
-    public DateOnly RentStartDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-    public DateOnly RentEndDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-    public TimeOnly RentStartTime { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
-    public TimeOnly RentEndTime { get; set; } = TimeOnly.FromDateTime(DateTime.Now);
+    public DateOnly RentStartDate { get; set; }
+    public DateOnly RentEndDate { get; set; } 
+    public TimeOnly RentStartTime { get; set; }
+    public TimeOnly RentEndTime { get; set; }
     public string LastName { get; set; } = "";
     public string FirstName { get; set; } = "";
     public string Email { get; set; } = "";
     public int Age { get; set; }
-    
+
     DateTime dateTimeStart;
     DateTime dateTimeEnd;
 
+    protected override void OnInitialized()
+    {
+        LoadSessionForm();
+    }
+
     protected override async Task OnInitializedAsync()
     {
+        RentStartDate = DateOnly.FromDateTime(DateTime.Now);
+        RentEndDate = DateOnly.FromDateTime(DateTime.Now);
+        RentStartTime = TimeOnly.FromDateTime(DateTime.Now);
+        RentEndTime = TimeOnly.FromDateTime(DateTime.Now);
+
         switch (bikeTypeNr)
         {
             case 1:
@@ -115,6 +127,8 @@
 
         BikeTypeModel bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + bikeTypeNr);
         pricePerH = bikeType.Price;
+
+        SetDatesAndPrice();
     }
 
     private void SetDatesAndPrice()
@@ -125,6 +139,36 @@
 
         RentSvc.CalculatePrice(RentSvc.DurationHours, pricePerH);
         Price = RentSvc.Price;
+    }
+
+    private async void SaveSessionForm(UserModel user, DateTime StartDateTime, DateTime EndDateTime)
+    {
+        await JsRuntime.InvokeVoidAsync("sessionStorage.setItem", "user", JsonSerializer.Serialize(user));
+        await JsRuntime.InvokeVoidAsync("sessionStorage.setItem", "startDateTime", JsonSerializer.Serialize(StartDateTime));
+        await JsRuntime.InvokeVoidAsync("sessionStorage.setItem", "endDateTime", JsonSerializer.Serialize(EndDateTime));
+    }
+
+    private async void LoadSessionForm()
+    {
+        string rentUser_json = await JsRuntime.InvokeAsync<string>("sessionStorage.getItem", "user");
+        string rentDateStart_json = await JsRuntime.InvokeAsync<string>("sessionStorage.getItem", "startDateTime");
+        string rentDateEnd_json = await JsRuntime.InvokeAsync<string>("sessionStorage.getItem", "endDateTime");
+
+        if (!(string.IsNullOrEmpty(rentUser_json) || string.IsNullOrEmpty(rentDateStart_json) || string.IsNullOrEmpty(rentDateEnd_json)))
+        {
+            UserModel sessionUser = JsonSerializer.Deserialize<UserModel>(rentUser_json);
+            Email = sessionUser.Email;
+            LastName = sessionUser.LastName;
+            FirstName = sessionUser.FirstName;
+            Age = sessionUser.Age;
+
+            DateTime sessionDateTimeStart = JsonSerializer.Deserialize<DateTime>(rentDateStart_json);
+            DateTime sessionDateTimeEnd = JsonSerializer.Deserialize<DateTime>(rentDateEnd_json);
+            RentStartDate = DateOnly.FromDateTime(sessionDateTimeStart);
+            RentStartTime = TimeOnly.FromDateTime(sessionDateTimeStart);
+            RentEndDate = DateOnly.FromDateTime(sessionDateTimeEnd);
+            RentEndTime = TimeOnly.FromDateTime(sessionDateTimeEnd);
+        }
     }
 
     private async void SendToCheckout()
@@ -150,10 +194,6 @@
 
             if (response.IsSuccessStatusCode)
             {
-                //string startDateString = RentStartDate.ToString("yyyy-MM-dd");
-                //string endDateString = RentEndDate.ToString("yyyy-MM-dd");
-                //string startTimeString = RentStartTime.ToString();
-                //string endTimeString = RentEndTime.ToString();
                 string startDateTimeString = dateTimeStart.ToString("yyyy-MM-dd-HH-mm");
                 string endDateTimeString = dateTimeEnd.ToString("yyyy-MM-dd-HH-mm");
 
@@ -163,7 +203,8 @@
                     PropertyNameCaseInsensitive = true
                 });
 
-                //NavManager.NavigateTo($"/checkout?userId={createdUser.Id}&type={bikeTypeNr}&startDate={startDateString}&endDate={endDateString}&startTime={startTimeString}&endTime={endTimeString}");
+                SaveSessionForm(user, dateTimeStart, dateTimeEnd);
+
                 NavManager.NavigateTo($"/checkout?userId={createdUser.Id}&type={bikeTypeNr}&startDate={startDateTimeString}&endDate={endDateTimeString}");
             }
             else
@@ -173,7 +214,9 @@
         }
         else
         {
-            message = "Rent duration must be at least one hour";
+            message = "Rent duration must be at least" 
+            + RentService.MinRentDuration 
+            + (RentService.MinRentDuration == 1? " hour" : " hours");
         }
 
         if(message != "")

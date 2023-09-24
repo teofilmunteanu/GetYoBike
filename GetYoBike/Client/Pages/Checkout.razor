@@ -54,12 +54,14 @@
     </div>
 
     <div class="right-bottom">
-        <total class="total">
-            <span>Total: @Price lei</span>
-        </total>
-        <button class="button" style="vertical-align:middle" @onclick="ConfirmRent">
-            <span>Checkout </span>
-        </button>
+        <div class="checkoutItemsContainer">
+            <total class="total">
+                <span>Total: @Price lei</span>
+            </total>
+            <button class="button" @onclick="ConfirmRent">
+                <span>Checkout </span>
+            </button> 
+        </div>
     </div>
 </div>
 
@@ -99,8 +101,10 @@
 
     //public string message { get; set; } = "";
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
+        CardExpDate = DateTime.Now;
+
         switch (BikeTypeNr)
         {
             case 1:
@@ -114,10 +118,8 @@
         SetPrice();
     }
 
-    private async void SetPrice()
+    private void SetPrice()
     {
-        BikeTypeModel bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + BikeTypeNr);
-
         Price = RentSvc.Price;
     }
 
@@ -155,14 +157,17 @@
                     EditPIN = ""
                 };
 
-            //obs: the post request isn't done until the later navigate
             var response = await Http.PostAsJsonAsync("/api/Rents/", rent);
-
-            RentSvc.SetRent(rent);
 
             if (response.IsSuccessStatusCode)
             {
-                NavManager.NavigateTo($"/thanks");
+                var responseContent = response.Content.ReadAsStringAsync().Result;
+                var createdRent = JsonSerializer.Deserialize<RentModel>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                NavManager.NavigateTo($"/thanks/?id={createdRent.Id}");
             }
             else
             {

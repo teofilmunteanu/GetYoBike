@@ -1,18 +1,16 @@
-﻿using GetYoBike.Shared.Models;
-
-namespace GetYoBike.Client.Services
+﻿namespace GetYoBike.Client.Services
 {
     public class RentService
     {
-        public RentModel CurrentRent { get; private set; }
-        public decimal Price { get; private set; }
-        public decimal DurationHours { get; private set; }
-        public static int MinRentDuration { get; set; }
+        //public RentModel CurrentRent { get; private set; }
+        public decimal Price { get; private set; } = 0;
+        public decimal DurationHours { get; private set; } = 0;
+        public static int MinRentDuration { get; } = 1;
 
-        public void SetRent(RentModel rent)
-        {
-            CurrentRent = rent;
-        }
+        //public void SetRent(RentModel rent)
+        //{
+        //    CurrentRent = rent;
+        //}
 
         public void SetDuration(DateTime startDateTime, DateTime endDateTime)
         {

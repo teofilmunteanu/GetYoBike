@@ -58,6 +58,8 @@
     border-radius: 20px;
     text-align: center;
     background-color: #5576A8;
+    align-items: center;
+    position: relative;
 }
 
 .button {
@@ -72,8 +74,6 @@
     width: 200px;
     transition: all 0.5s;
     cursor: pointer;
-    margin: 25px;
-    position: relative;
 }
 
     .button span {
@@ -106,6 +106,17 @@
     font-weight: bold;
     text-align: center;
     align-items: normal;
+}
+
+.checkoutItemsContainer {
+    position: absolute;
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 80%; 
 }
 
 .img-div {

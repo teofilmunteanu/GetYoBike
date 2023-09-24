@@ -198,7 +198,7 @@ namespace GetYoBike.Server.Controllers
 
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetRent", new { id = rent.RenterUserId }, rent);
+            return CreatedAtAction("GetRent", new { id = rent.Id }, rent);
         }
 
         // DELETE: api/Rents/5

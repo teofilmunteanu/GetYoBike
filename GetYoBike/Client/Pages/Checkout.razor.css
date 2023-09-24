@@ -58,22 +58,22 @@
     border-radius: 20px;
     text-align: center;
     background-color: #5576A8;
+    align-items: center;
+    position: relative;
 }
 
 .button {
     display: inline-block;
-    border-radius: 15px;
+    border-radius: 4px;
     background-color: #3C6067;
     border: none;
     color: #FFFFFF;
     text-align: center;
-    font-size: 20px;
+    font-size: 28px;
     padding: 20px;
-    width: 150px;
+    width: 200px;
     transition: all 0.5s;
     cursor: pointer;
-    margin: 25px;
-    position: relative;
 }
 
     .button span {
@@ -106,6 +106,17 @@
     font-weight: bold;
     text-align: center;
     align-items: normal;
+}
+
+.checkoutItemsContainer {
+    position: absolute;
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    width: 80%; 
 }
 
 .img-div {

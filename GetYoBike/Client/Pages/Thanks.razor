@@ -27,36 +27,52 @@
 
 </div>
 @code {
-    public string Email { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "id")]
+    public int RentId { get; set; }
+
     public string EditPIN { get; set; }
+    public string Email { get; set; }
+
+    private async Task ClearSessionData()
+    {
+        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "user");
+        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "startDateTime");
+        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "endDateTime");
+    }
 
     protected override async Task OnInitializedAsync()
     {
+        RentModel rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/" + RentId);
+        UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
+
+        EditPIN = rent.EditPIN;
+        Email = user.Email;
         //If it's the first time the page is loaded, CurrentRent wouldn't be null
-        if (RentSvc.CurrentRent != null)
-        {
-            string startDateTimeString = RentSvc.CurrentRent.StartDate.ToString("yyyy-MM-dd-HH-mm");
-            string endDateTimeString = RentSvc.CurrentRent.EndDate.ToString("yyyy-MM-dd-HH-mm");
-            int userId = RentSvc.CurrentRent.UserID;
-            int bikeId = RentSvc.CurrentRent.BikeID;
+        //if (RentSvc.CurrentRent != null)
+        //{
+        //    string startDateTimeString = RentSvc.CurrentRent.StartDate.ToString("yyyy-MM-dd-HH-mm");
+        //    string endDateTimeString = RentSvc.CurrentRent.EndDate.ToString("yyyy-MM-dd-HH-mm");
+        //    int userId = RentSvc.CurrentRent.UserID;
+        //    int bikeId = RentSvc.CurrentRent.BikeID;
 
-            //search rent by BikeId, UserId, startdate, enddate
-            RentModel rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/getRentByDates?userId=" + userId + "&bikeId=" + bikeId + "&startDateTime=" + startDateTimeString + "&endDateTime=" + endDateTimeString);
-            UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
+        //    //search rent by BikeId, UserId, startdate, enddate
+        //    RentModel rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/getRentByDates?userId=" + userId + "&bikeId=" + bikeId + "&startDateTime=" + startDateTimeString + "&endDateTime=" + endDateTimeString);
+        //    UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
 
-            EditPIN = rent.EditPIN;
-            Email = user.Email;
+        //    EditPIN = rent.EditPIN;
+        //    Email = user.Email;
 
-            await JsRuntime.InvokeVoidAsync("localStorage.setItem", "rentEditPIN", JsonSerializer.Serialize(rent.EditPIN));
-            await JsRuntime.InvokeVoidAsync("localStorage.setItem", "userEmail", JsonSerializer.Serialize(user.Email));
-        }
-        else
-        {
-            string rentEditPIN_json = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "rentEditPIN");
-            EditPIN = JsonSerializer.Deserialize<string>(rentEditPIN_json);
+        //    await JsRuntime.InvokeVoidAsync("localStorage.setItem", "rentEditPIN", JsonSerializer.Serialize(rent.EditPIN));
+        //    await JsRuntime.InvokeVoidAsync("localStorage.setItem", "userEmail", JsonSerializer.Serialize(user.Email));
+        //}
+        //else
+        //{
+        //    string rentEditPIN_json = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "rentEditPIN");
+        //    EditPIN = JsonSerializer.Deserialize<string>(rentEditPIN_json);
 
-            string userEmail_json = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "userEmail");
-            Email = JsonSerializer.Deserialize<string>(userEmail_json);
-        }
+        //    string userEmail_json = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "userEmail");
+        //    Email = JsonSerializer.Deserialize<string>(userEmail_json);
+        //}
     }
 }
