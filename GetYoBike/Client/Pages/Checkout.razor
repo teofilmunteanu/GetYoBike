@@ -125,7 +125,7 @@
 
     private async Task<BikeModel> GetAnAvailableBike()
     {
-        List<BikeModel> availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?startDateTime=" + StartDateString + "&endDateTime=" + EndDateString);
+        List<BikeModel> availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?startDateTime=" + StartDateString + "&endDateTime=" + EndDateString + "&bikeTypeId=" + BikeTypeNr);
 
         int randBikeId = new Random().Next(0, availableBikes.Count - 1);
         BikeModel bike = availableBikes[randBikeId];

@@ -5,6 +5,7 @@
 @using GetYoBike.Client.Services;
 @using GetYoBike.Shared.Models;
 @using System.Text.Json;
+@using System.Net;
 @inject NavigationManager NavManager
 @inject HttpClient Http
 @inject Services.RentService RentSvc
@@ -177,52 +178,69 @@
 
         if (RentSvc.DurationHours >= RentService.MinRentDuration)
         {
-            //if email already used, assign this rent 
-            UserModel user = new UserModel
+            UserModel? user = null;
+
+            try{
+                user = await Http.GetFromJsonAsync<UserModel>("api/Users/findUserByEmail/" + this.Email);
+            }
+            catch(HttpRequestException e)
+            {
+                if(e.StatusCode == HttpStatusCode.NotFound)
                 {
-                    //Email = this.Email,
-                    //LastName = this.LastName,
-                    //FirstName = this.FirstName,
-                    //Age = this.Age
-                    Email = "mock@email.com",
-                    LastName = "last name",
-                    FirstName = "first name",
-                    Age = 21
-                };
+                    UserModel userForm = new UserModel
+                        {
+                            Email = this.Email,
+                            LastName = this.LastName,
+                            FirstName = this.FirstName,
+                            Age = this.Age
+                        };
 
-            var response = await Http.PostAsJsonAsync("/api/Users/", user);
+                    var response = await Http.PostAsJsonAsync("/api/Users/", userForm);
+                    var responseContent = response.Content.ReadAsStringAsync().Result;
+                    user = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
 
-            if (response.IsSuccessStatusCode)
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        message = response.Content.ReadAsStringAsync().Result;
+                    }
+                }
+                else
+                {
+                    message = e.Message;
+                }
+            }
+            catch (Exception e)
+            {
+                message = e.Message;
+            }
+
+            if (user != null)
             {
                 string startDateTimeString = dateTimeStart.ToString("yyyy-MM-dd-HH-mm");
                 string endDateTimeString = dateTimeEnd.ToString("yyyy-MM-dd-HH-mm");
 
-                var responseContent = response.Content.ReadAsStringAsync().Result;
-                var createdUser = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
                 SaveSessionForm(user, dateTimeStart, dateTimeEnd);
 
-                NavManager.NavigateTo($"/checkout?userId={createdUser.Id}&type={bikeTypeNr}&startDate={startDateTimeString}&endDate={endDateTimeString}");
+                NavManager.NavigateTo($"/checkout?userId={user.Id}&type={bikeTypeNr}&startDate={startDateTimeString}&endDate={endDateTimeString}");
             }
             else
             {
-                message = response.Content.ReadAsStringAsync().Result;
+                message = "A problem occured during user assignment";
             }
         }
         else
         {
             message = "Rent duration must be at least" 
-            + RentService.MinRentDuration 
-            + (RentService.MinRentDuration == 1? " hour" : " hours");
+                + RentService.MinRentDuration 
+                + (RentService.MinRentDuration == 1? " hour" : " hours");
         }
 
         if(message != "")
         {
             await JsRuntime.InvokeVoidAsync("alert", message);
         }
-        
     }
 }

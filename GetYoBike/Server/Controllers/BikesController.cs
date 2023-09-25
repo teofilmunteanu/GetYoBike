@@ -148,7 +148,7 @@ namespace GetYoBike.Server.Controllers
         //get list of bikes that are not rented in specified interval
         // GET: api/Bikes/availableBikesInInterval/dateTime?=2011-08-12T20:17:46.384Z&duration=5
         [HttpGet("availableBikesInInterval")]
-        public async Task<ActionResult<List<Bike>>> GetAvailableBikes([BindRequired] string startDateTime, [BindRequired] string endDateTime)
+        public async Task<ActionResult<List<Bike>>> GetAvailableBikes([BindRequired] string startDateTime, [BindRequired] string endDateTime, [BindRequired] int bikeTypeId)
         {
             DateTime startDateFormatted;
             DateTime endDateFormatted;
@@ -162,19 +162,15 @@ namespace GetYoBike.Server.Controllers
             {
                 List<int> unavailableBikesIds = new List<int>();
 
-                List<Rent> rents = /*await */_context.Rents.Include(r => r.RentedBike).ToList/*Async*/();
-
-                //List<Rent> activeRents = rents.Where(r => r.RentStartDate.AddHours(r.RentHoursDuration) > dateTimeFormatted &&
-                //    r.RentStartDate < dateTimeFormatted.AddHours((double)duration)).ToList();
-                //activeRents.ForEach(r => unavailableBikesIds.Add(r.RentedBike.Id));
+                List<Rent> rents = _context.Rents.Include(r => r.RentedBike).ToList();
 
                 List<Rent> activeRents = rents.Where(
                     r => r.StartDate >= startDateFormatted && r.EndDate <= endDateFormatted
                 ).ToList();
                 activeRents.ForEach(r => unavailableBikesIds.Add(r.RentedBike.Id));
 
-                //check if any of the active rents has a bike, and add that bike to the list if not       
-                availableBikes = _context.Bikes.Where(b => !(unavailableBikesIds.Contains(b.Id))).ToList();
+                //check if any of the active rents has a bike of the selected type, and add that bike to the list if not       
+                availableBikes = _context.Bikes.Where(b => b.TypeId == bikeTypeId && !(unavailableBikesIds.Contains(b.Id))).ToList();
             }
             else
             {
@@ -185,7 +181,7 @@ namespace GetYoBike.Server.Controllers
             {
                 return NotFound();
             }
-            //Console.WriteLine($"Setialized to universal format{dateTime.ToString("yyyy-MM-dd'T'HH:mm:ssZ")}"); 
+
             return Ok(availableBikes);
         }
 

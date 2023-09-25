@@ -73,6 +73,17 @@ namespace GetYoBike.Server.Controllers
             return Ok(EntityToModel(user));
         }
 
+        [HttpGet("findUserByEmail/{email}")]
+        public async Task<IActionResult> FindUserByEmail(string email)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
+        }
+
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
@@ -122,6 +133,12 @@ namespace GetYoBike.Server.Controllers
             {
                 return BadRequest("Invalid email!");
             }
+
+            if (_context.Users.Where(u => u.Email == userModel.Email).Any())
+            {
+                return Conflict("Email is already used!");
+            }
+
             if (!user.ValidaterAge())
             {
                 return BadRequest("User should be between 14 and 70 years old!");
@@ -161,7 +178,6 @@ namespace GetYoBike.Server.Controllers
         [HttpPut("changeEmail/{id}")]
         public async Task<IActionResult> ChangeEmail(int id, string email)
         {
-            //User user = _context.Users.Where(u => u.Id == id).First();
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
@@ -175,9 +191,7 @@ namespace GetYoBike.Server.Controllers
             return Ok(user);
         }
 
-        //POST postez ceva nou
-        //PUT schimb ceva existent
-        [HttpPut("changeFirstName/{id}")]//astea sunt link-uri
+        [HttpPut("changeFirstName/{id}")]
         public async Task<IActionResult> ChangeFirstName(int id, string name)
         {
             var user = await _context.Users.FindAsync(id);
@@ -204,17 +218,6 @@ namespace GetYoBike.Server.Controllers
             user.LastName = name;
             await _context.SaveChangesAsync();
 
-            return Ok(user);
-        }
-
-        [HttpGet("findUserByMail/{mail}")]
-        public async Task<IActionResult> FindUserByMail(string mail)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == mail);
-            if (user == null)
-            {
-                return NotFound();
-            }
             return Ok(user);
         }
     }
