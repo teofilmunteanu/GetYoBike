@@ -11,10 +11,6 @@
     position: absolute
 }
 
-.location {
-    color: #6594EF;
-}
-
 .box {
     background-color: #5e7eb3;
     padding: 25px;
@@ -29,4 +25,5 @@
     width: 80px;
     height: 25px;
     color: #fff;
+    cursor: pointer;
 }

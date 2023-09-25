@@ -10,26 +10,32 @@
     <div class="card">
         <div>
             <!-- Can use the class (location) to change the color -->
-            <b>Thank you for renting a <span class="location">City</span> Bicycle!</b>
+            <b>Thank you for renting a <span style="color:@TypeColor">@BikeTypeString</span> Bicycle!</b>
         </div><br><br>
         <div>
             To edit the renting detals, please use the following PIN after <br> accessing your rents list on the homepage through the email.
         </div><br>
         <div class="box">
-            <!-- Can use the class (email/pin) to extract from database, or do as u want -->
             <div>Rent Made on Email: <span class="email">@Email</span></div><br>
             <div>Rent Edit PIN: <span class="pin">@EditPIN</span></div>
         </div>
-        <div>
-            <button class="home-button">Home</button>
-        </div>
+        
+        <button class="home-button" onclick="window.location.href='/';">Home</button>
+       
     </div>
 
 </div>
 @code {
     [Parameter]
+    [SupplyParameterFromQuery(Name = "type")]
+    public int BikeTypeNr { get; set; }
+
+    [Parameter]
     [SupplyParameterFromQuery(Name = "id")]
     public int RentId { get; set; }
+
+    public string BikeTypeString { get; set; }
+    public string TypeColor { get; set; }
 
     public string EditPIN { get; set; }
     public string Email { get; set; }
@@ -43,11 +49,35 @@
 
     protected override async Task OnInitializedAsync()
     {
-        RentModel rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/" + RentId);
-        UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
+        if(BikeTypeNr == 1)
+        {
+            BikeTypeString = "City";
+            TypeColor = "#6594EF";
+        }
+        else if(BikeTypeNr == 2)
+        {
+            BikeTypeString = "Mountain";
+            TypeColor = "#DB7A50";
+        }
+        else
+        {
+            BikeTypeString = "Default";
+            TypeColor = "white";
+        }
 
-        EditPIN = rent.EditPIN;
-        Email = user.Email;
+        try
+        {
+            RentModel? rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/" + RentId);
+            UserModel? user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
+            EditPIN = rent.EditPIN;
+            Email = user.Email;
+        }
+        catch(Exception e)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", e.Message);
+        }
+
+        await ClearSessionData();
         //If it's the first time the page is loaded, CurrentRent wouldn't be null
         //if (RentSvc.CurrentRent != null)
         //{
