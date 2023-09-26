@@ -1,9 +1,12 @@
 ﻿@page "/rents"
 
 @using GetYoBike.Shared.Models;
+@using System.Text.Json;
+@using System.Net;
 @inject IJSRuntime JsRuntime
 @inject HttpClient Http
 @inject NavigationManager NavManager
+
 
 <header>
     <b>Your Rents</b>
@@ -15,7 +18,7 @@
 </header>
 
 <div class="wraper">
-    @foreach (var rent in rents)
+    @foreach (var rent in RentsList)
     {
         <div class="card">
             <div>
@@ -37,10 +40,10 @@
                 <div>@rent.Price</div>
             </div>
             <div>
-                <button>Edit</button> 
+                <button @onclick="() => Check_PIN_and_Send(rent.Id, rent.EditPIN)" class="edit-button">Edit</button>
             </div>
             <div>
-                <input type="number" placeholder="Enter Rent PIN"> 
+                <input type="number" placeholder="Enter Rent PIN" @bind="InputEditPIN">
             </div>
         </div>
     }
@@ -53,30 +56,69 @@
     [SupplyParameterFromQuery(Name = "email")]
     public string Email { get; set; } = "";
 
-    public List<RentModel> rents { get; set; } = new List<RentModel>();
+    public List<RentModel>? RentsList { get; set; } = new List<RentModel>();
 
-    public string message = "";
+    public string InputEditPIN { get; set; } = "";
+
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await Http.GetAsync("api/Users/FindUserByMail/" + Email);
+        string message = "";
+
+        //Example of using the response code, instead of try-catch
+        var response = await Http.GetAsync("api/Users/FindUserByEmail/" + Email);
         if (response.IsSuccessStatusCode)
         {
-            UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/FindUserByMail/" + Email);
-            rents = await Http.GetFromJsonAsync<List<RentModel>>("api/Rents/GetRentsOfUser/" + user.Id);
+            var responseContent = response.Content.ReadAsStringAsync().Result;
+            UserModel? user = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            if (user != null)
+            {
+                //Example of using try-catch
+                try
+                {
+                    RentsList = await Http.GetFromJsonAsync<List<RentModel>>("api/Rents/GetRentsOfUser/" + user.Id);
+                }
+                catch(HttpRequestException e)
+                {
+                    if(e.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        message = "No rents found";
+                    }
+                    else
+                    {
+                        message = e.Message;
+                    }
+                }
+            }
         }
-        else if(response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        else if(response.StatusCode == HttpStatusCode.NotFound)
         {
-            message = "No rents found";
+            message = "No user found";
         }
         else
         {
             message = response.Content.ReadAsStringAsync().Result;
         }
-        
+
         if (message != "")
         {
             await JsRuntime.InvokeVoidAsync("alert", message);
+        }
+    }
+
+    public async Task Check_PIN_and_Send(int rentId, string EditPIN)
+    {
+        if (EditPIN == InputEditPIN)
+        {
+            NavManager.NavigateTo("/edit/"+rentId);
+        }
+        else
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "Incorrect PIN");
         }
     }
 }

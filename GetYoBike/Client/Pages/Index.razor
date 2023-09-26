@@ -4,6 +4,7 @@
 @inject HttpClient Http
 @inject NavigationManager NavManager
 
+
 <PageTitle>Index</PageTitle>
 
 <section class="section">
@@ -17,7 +18,7 @@
         <span class="image"><img src="assets/file-management.png"></span>
         <span><b>Change <br> Rent details </b></span>
         <span>
-            <input @bind="userEmail" type="email" placeholder="Rent Email">
+            <input @bind="UserEmail" type="email" placeholder="Rent Email">
         </span>
 
         <span><button class="end-btn" @onclick="SendToRents"><i class="fa fa-chevron-right"></i></button></span>
@@ -32,13 +33,13 @@
 
 </section>
 @code {
-    private string userEmail = "";
+    private string UserEmail { get;set; } = "";
 
     private void SendToRents()
     {
-        if (userEmail != "")
+        if (UserEmail != "")
         {
-            NavManager.NavigateTo($"/rents?email={userEmail}");
+            NavManager.NavigateTo($"/rents?email={UserEmail}");
         }
     }
 

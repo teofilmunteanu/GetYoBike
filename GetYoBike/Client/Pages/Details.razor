@@ -1,4 +1,4 @@
-﻿@page "/details/{bikeTypeNr:int}"
+﻿@page "/details/{BikeTypeNr:int}"
 
 
 @inject IJSRuntime JsRuntime
@@ -10,10 +10,9 @@
 @inject HttpClient Http
 @inject Services.RentService RentSvc
 
-@*<header>
-    <b><b style="color:#6594EF;">Rent City Bike</b> - Details</b>
-</header>*@
-<Header Color="#6594EF" Title="Rent City Bike" Subtitle="Details"/>
+
+<Header Color="@BikeTypeColor" Title="@BikeTypeTitle" Subtitle="Details" />
+
 <div id="grid-container">
     <div class="left">
 
@@ -86,23 +85,27 @@
 
 @code {
     [Parameter]
-    public int bikeTypeNr { get; set; }
+    public int BikeTypeNr { get; set; }
 
-    public string SelectedImagePath { get; set; } = "";
     public decimal Price { get; set; } = 0;
-    private decimal pricePerH { get; set; }
+    public string SelectedImagePath { get; set; } = "";
+    public string BikeTypeColor { get; set; } = "";
+    public string BikeTypeTitle { get; set; } = "";
 
-    public DateOnly RentStartDate { get; set; }
-    public DateOnly RentEndDate { get; set; } 
-    public TimeOnly RentStartTime { get; set; }
-    public TimeOnly RentEndTime { get; set; }
     public string LastName { get; set; } = "";
     public string FirstName { get; set; } = "";
     public string Email { get; set; } = "";
     public int Age { get; set; }
 
+    public DateOnly RentStartDate { get; set; }
+    public DateOnly RentEndDate { get; set; } 
+    public TimeOnly RentStartTime { get; set; }
+    public TimeOnly RentEndTime { get; set; }
+
+    private decimal pricePerH;
     DateTime dateTimeStart;
     DateTime dateTimeEnd;
+
 
     protected override void OnInitialized()
     {
@@ -116,17 +119,21 @@
         RentStartTime = TimeOnly.FromDateTime(DateTime.Now);
         RentEndTime = TimeOnly.FromDateTime(DateTime.Now);
 
-        switch (bikeTypeNr)
+        switch (BikeTypeNr)
         {
             case 1:
                 SelectedImagePath = "assets/rentCityBike.png";
+                BikeTypeTitle = "Rent City Bike";
+                BikeTypeColor = "#6594EF";
                 break;
             case 2:
                 SelectedImagePath = "assets/rentMountainBike.png";
+                BikeTypeTitle = "Rent Mountain Bike";
+                BikeTypeColor = "#DB7A50";
                 break;
         }
 
-        BikeTypeModel bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + bikeTypeNr);
+        BikeTypeModel bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + BikeTypeNr);
         pricePerH = bikeType.Price;
 
         SetDatesAndPrice();
@@ -224,7 +231,7 @@
 
                 SaveSessionForm(user, dateTimeStart, dateTimeEnd);
 
-                NavManager.NavigateTo($"/checkout?userId={user.Id}&type={bikeTypeNr}&startDate={startDateTimeString}&endDate={endDateTimeString}");
+                NavManager.NavigateTo($"/checkout?userId={user.Id}&type={BikeTypeNr}&startDate={startDateTimeString}&endDate={endDateTimeString}");
             }
             else
             {

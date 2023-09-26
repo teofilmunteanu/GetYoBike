@@ -8,10 +8,9 @@
 @inject HttpClient Http
 @inject Services.RentService RentSvc
 
-@*<header>
-    <b><b style="color:#6594EF;">Rent City Bike</b> - Payment</b>
-</header>*@
-<Header Color="#6594EF" Title="Rent City Bike" Subtitle="Payment" />
+
+<Header Color="@BikeTypeColor" Title="@BikeTypeTitle" Subtitle="Payment" />
+
 <div class="grid-container">
 
     <div class="left">
@@ -24,10 +23,10 @@
                     <br />
                     <input type="text" name="Card Number" id="cardnumber" class="cardnr" @bind="NrCard">
                 </div>
-                <div class="firstname-grid">
+                <div class="cvc-grid">
                     <label for="first Name" class="formLabel">CVC</label>
                     <br />
-                    <input type="text" name="First Name" id="firstname" class="cvc" @bind="CardCVC">
+                    <input type="text" name="First Name" id="cvc" class="cvc" @bind="CardCVC">
                 </div>
                 <div class="month-grid">
                     <label for="month" class="formLabel">Card Expiration Date</label>
@@ -65,8 +64,6 @@
     </div>
 </div>
 
-@*NavManager.NavigateTo($"/checkout?id={user.Id}&type={bikeTypeNr}&date={dateString}&duration={RentDuration}");*@
-
 @code {
     [Parameter]
     [SupplyParameterFromQuery(Name = "userId")]
@@ -78,28 +75,24 @@
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "startDate")]
-    public string StartDateString { get; set; }
+    public string StartDateString { get; set; } = "";
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "endDate")]
-    public string EndDateString { get; set; }
+    public string EndDateString { get; set; } = "";
 
 
     public string SelectedImagePath { get; set; } = "";
+    public string BikeTypeColor { get; set; } = "";
+    public string BikeTypeTitle { get; set; } = "";
 
     public decimal Price { get; set; } = 0;
-
     public string NrCard { get; set; } = "";
-
     public string CardCVC { get; set; } = "";
-
-    public string FirstName { get; set; } = "";
-
     public DateTime CardExpDate { get; set; }
-
     public string CardName { get; set; } = "";
 
-    //public string message { get; set; } = "";
+
 
     protected override void OnInitialized()
     {
@@ -109,9 +102,13 @@
         {
             case 1:
                 SelectedImagePath = "assets/rentCityBike.png";
+                BikeTypeTitle = "Rent City Bike";
+                BikeTypeColor = "#6594EF";
                 break;
             case 2:
                 SelectedImagePath = "assets/rentMountainBike.png";
+                BikeTypeTitle = "Rent Mountain Bike";
+                BikeTypeColor = "#DB7A50";
                 break;
         }
 

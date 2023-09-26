@@ -120,11 +120,11 @@
 
 .username {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
     grid-template-rows: 1fr 1fr;
     grid-template-areas:
-        "email email email"
-        "rent rent time";
+        "email email email ."
+        "rent1 time1 rent2 time2";
     align-items: center;
     justify-content: space-around;
     place-self: center;
@@ -292,4 +292,26 @@
     font-size: x-large;
     align-items: normal;
     margin: 25px;
+}
+
+.rentDate {
+    width: 90%;
+    margin: 10px 0;
+    border-width: 0;
+    padding: 15px;
+    color: #646464;
+    font-weight: bold;
+    font-size: 1rem;
+    background-color: #D9D9D9;
+}
+
+.rentTime {
+    width: 85%;
+    margin: 10px 0;
+    border-width: 0;
+    padding: 13px;
+    color: #646464;
+    font-weight: bold;
+    font-size: 1rem;
+    background-color: #D9D9D9;
 }

@@ -6,10 +6,10 @@
 @inject IJSRuntime JsRuntime
 @inject HttpClient Http
 
+
 <div class="wraper">
     <div class="card">
         <div>
-            <!-- Can use the class (location) to change the color -->
             <b>Thank you for renting a <span style="color:@TypeColor">@BikeTypeString</span> Bicycle!</b>
         </div><br><br>
         <div>
@@ -34,11 +34,14 @@
     [SupplyParameterFromQuery(Name = "id")]
     public int RentId { get; set; }
 
-    public string BikeTypeString { get; set; }
-    public string TypeColor { get; set; }
 
-    public string EditPIN { get; set; }
-    public string Email { get; set; }
+    public string BikeTypeString { get; set; } = "";
+    public string TypeColor { get; set; } = "";
+
+    public string EditPIN { get; set; } = "";
+    public string Email { get; set; } = "";
+
+
 
     private async Task ClearSessionData()
     {

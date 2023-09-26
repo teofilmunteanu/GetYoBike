@@ -29,6 +29,7 @@ header {
     background-color: #91AD95;
     border-color: #91AD95;
     border: none;
+    cursor: pointer;
 }
 
 /* the wraper */

@@ -1,14 +1,14 @@
-﻿@page "/edit"
+﻿@page "/edit/{RentId:int}"
 
 @inject IJSRuntime JsRuntime
 @using GetYoBike.Shared.Models;
 @inject NavigationManager NavManager
 @inject HttpClient Http
+@inject Services.RentService RentSvc
 
-@*<header>
-    <b>Edit Rent Details</b>
-</header>*@
+@*check if edit pin was inserted*@
 <Header Title="Edit Rent Details" />
+
 <div class="grid-container">
 
     <div class="left-top">
@@ -20,15 +20,30 @@
                     <br />
                     <input type="email" name="email" id="email" class="email" @bind="Email">
                 </div>
-                <div class="rentstart-grid">
-                    <label for="rent" class="formLabel">Rent Start Date</label>
+                <br/>
+                <div class="dateStart-grid">
+                    <label for="rent" class="formLabel">Start Date</label>
                     <br />
-                    <input type="date" id="rent" class="rentstart" @bind="Date" />
+                    <input type="date" name="StartDate" class="rentDate"
+                           @bind="RentStartDate" @bind:after="SetDatesAndPrice" />
                 </div>
-                <div class="duration-grid">
-                    <label for="duration" class="formLabel">Duration</label>
+                <div class="timeStart-grid">
+                    <label for="duration" class="formLabel">Start Time</label>
                     <br />
-                    <input type="number" name="duration" id="duration" class="duration" placeholder="hh" @bind="Duration">
+                    <input type="time" name="StartTime" class="rentTime" placeholder="hh"
+                           @bind="RentStartTime" @bind:after="SetDatesAndPrice">
+                </div>
+                <div class="dateEnd-grid">
+                    <label for="rent" class="formLabel">End Date</label>
+                    <br />
+                    <input type="date" name="EndDate" class="rentDate"
+                           @bind="RentEndDate" @bind:after="SetDatesAndPrice" />
+                </div>
+                <div class="timeEnd-grid">
+                    <label for="duration" class="formLabel">End Time</label>
+                    <br />
+                    <input type="time" name="EndTime" class="rentTime" placeholder="hh"
+                           @bind="RentEndTime" @bind:after="SetDatesAndPrice">
                 </div>
 
                 <br />
@@ -44,12 +59,12 @@
         <div class="wrapper">
             <div class="tabs">
                 <div class="tab">
-                    <input type="radio" name="css-tabs" id="tab-1" class="tab-switch" checked="@(Type == 1)" @onchange="@(() => Type = 1)">
+                    <input type="radio" name="css-tabs" id="tab-1" class="tab-switch" checked="@(BikeTypeNr == 1)" @onchange="@(() => BikeTypeNr = 1)">
                     <label for="tab-1" class="tab-label"><img src="assets/buildings.png" class="img-tab"></label>
                     <div class="tab-content"><img src="assets/rentCityBike.png" class="img-div"></div>
                 </div>
                 <div class="tab">
-                    <input type="radio" name="css-tabs" id="tab-2" class="tab-switch" checked="@(Type == 2)" @onchange="@(() => Type = 2)">
+                    <input type="radio" name="css-tabs" id="tab-2" class="tab-switch" checked="@(BikeTypeNr == 2)" @onchange="@(() => BikeTypeNr = 2)">
                     <label for="tab-2" class="tab-label"><img src="assets/mountain.png" class="img-tab"></label>
                     <div class="tab-content"><img src="assets/rentMountainBike.png" class="img-div"></div>
                 </div>
@@ -74,30 +89,42 @@
     </div>
 </div>
 @code {
-
     [Parameter]
-    public DateTime RentDate { get; set; } = DateTime.Now;
-    public int Duration { get; set; } = 0;
-    public string LastName { get; set; } = "";
-    public string FirstName { get; set; } = "";
-    public string Email { get; set; } = "";
-    public DateTime Date { get; set; }
-    public int Type { get; set; } = 1;
+    public int RentId { get; set; }
 
-    public string message = "";
+    public decimal Price { get; set; }
+    public int BikeTypeNr { get; set; }
+
+    public string Email { get; set; } = "";
+
+    public DateOnly RentStartDate { get; set; }
+    public DateOnly RentEndDate { get; set; }
+    public TimeOnly RentStartTime { get; set; }
+    public TimeOnly RentEndTime { get; set; }
+
+    private decimal pricePerH;
+    DateTime dateTimeStart;
+    DateTime dateTimeEnd;
+
 
     public async void SetType()
     {
-        await JsRuntime.InvokeVoidAsync("alert", Type.ToString());
+        await JsRuntime.InvokeVoidAsync("alert", BikeTypeNr.ToString());
     }
-    //protected override async Task OnInitializedAsync()
-    //{
-      //  var response = await Http.GetAsync("api/Rents/FindUserByMail/" + Email);
-       // if (response.IsSuccessStatusCode)
-        //{
-    // UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/PostRent/" ;
-           // rents = await Http.GetFromJsonAsync<List<RentModel>>("api/Rents/GetRentsOfUser/" + user.Id);
-       // }
-   // }
+
+    private void SetDatesAndPrice()
+    {
+        dateTimeStart = RentStartDate.ToDateTime(new TimeOnly(RentStartTime.Hour, RentStartTime.Minute, 0));
+        dateTimeEnd = RentEndDate.ToDateTime(new TimeOnly(RentEndTime.Hour, RentEndTime.Minute, 0));
+        RentSvc.SetDuration(dateTimeStart, dateTimeEnd);
+
+        RentSvc.CalculatePrice(RentSvc.DurationHours, pricePerH);
+        Price = RentSvc.Price;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //if the email is changed to one not owned by a user, create a user, otherwise, give this rent to that user
+    }
 
 }
