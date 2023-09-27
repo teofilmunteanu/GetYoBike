@@ -122,71 +122,95 @@
 
     private async Task<BikeModel> GetAnAvailableBike()
     {
-        List<BikeModel> availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?startDateTime=" + StartDateString + "&endDateTime=" + EndDateString + "&bikeTypeId=" + BikeTypeNr);
+        try
+        {
+            List<BikeModel>? availableBikes = await Http.GetFromJsonAsync<List<BikeModel>>("api/Bikes/availableBikesInInterval?startDateTime=" + StartDateString + "&endDateTime=" + EndDateString + "&bikeTypeId=" + BikeTypeNr);
 
-        int randBikeId = new Random().Next(0, availableBikes.Count - 1);
-        BikeModel bike = availableBikes[randBikeId];
+            if(availableBikes != null)
+            {
+                int randBikeId = new Random().Next(0, availableBikes.Count - 1);
+                BikeModel bike = availableBikes[randBikeId];
 
-        return bike;
+                return bike;
+            }
+            else
+            {
+                throw new Exception("Couldn't check for available bikes!");
+            }
+
+        }
+        catch (HttpRequestException e)
+        {
+            if (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new Exception("No bikes available");
+            }
+            else
+            {
+                throw e;
+            }
+        }
+    }
+
+    private async Task<RentModel> CreateRent()
+    {
+        BikeModel? bike = await GetAnAvailableBike();
+
+        DateTime rentStartDate, rentEndDate;
+        DateTime.TryParseExact(StartDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentStartDate);
+        DateTime.TryParseExact(EndDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentEndDate);
+
+        RentModel rent = new RentModel()
+            {
+                UserID = this.UserId,
+                BikeID = bike.Id,
+                StartDate = rentStartDate,
+                EndDate = rentEndDate,
+                CardNr = this.NrCard.ToString(),
+                CardCVC = this.CardCVC,
+                CardExpMonth = CardExpDate.Month.ToString(),
+                CardExpYear = CardExpDate.Year.ToString(),
+                CardHolderName = this.CardName,
+                EditPIN = ""
+            };
+
+        return rent;
     }
 
     public async Task ConfirmRent()
     {
+        string message = "";
         try
         {
-            BikeModel bike = await GetAnAvailableBike();
-
-            DateTime rentStartDate, rentEndDate;
-            DateTime.TryParseExact(StartDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentStartDate);
-            DateTime.TryParseExact(EndDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentEndDate);
-
-            RentModel rent = new RentModel()
-                {
-                    UserID = this.UserId,
-                    BikeID = bike.Id,
-                    StartDate = rentStartDate,
-                    EndDate = rentEndDate,
-                    CardNr = this.NrCard.ToString(),
-                    CardCVC = this.CardCVC,
-                    CardExpMonth = CardExpDate.Month.ToString(),
-                    CardExpYear = CardExpDate.Year.ToString(),
-                    CardHolderName = this.CardName,
-                    EditPIN = ""
-                };
+            RentModel rent = await CreateRent();
 
             var response = await Http.PostAsJsonAsync("/api/Rents/", rent);
 
             if (response.IsSuccessStatusCode)
             {
-                var responseContent = response.Content.ReadAsStringAsync().Result;
-                var createdRent = JsonSerializer.Deserialize<RentModel>(responseContent, new JsonSerializerOptions
+                string responseContent = response.Content.ReadAsStringAsync().Result;
+                RentModel? createdRent = JsonSerializer.Deserialize<RentModel>(responseContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                if(createdRent != null)
                 {
-                    PropertyNameCaseInsensitive = true
-                });
-
-                NavManager.NavigateTo($"/thanks/?type={BikeTypeNr}&id={createdRent.Id}");
+                    NavManager.NavigateTo($"/thanks/?type={BikeTypeNr}&id={createdRent.Id}");
+                }
+                else
+                {
+                    throw new Exception("A problem occured during deserialization of rent!");
+                }  
             }
             else
             {
-                string message = response.Content.ReadAsStringAsync().Result;
-                await JsRuntime.InvokeVoidAsync("alert", message);
+                throw new Exception(response.Content.ReadAsStringAsync().Result);
             }
-        }
-        catch(HttpRequestException e)
-        {
-            if(e.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                await JsRuntime.InvokeVoidAsync("alert", "No bikes available");
-            }
-            else
-            {
-                await JsRuntime.InvokeVoidAsync("alert", e.Message);
-            }    
         }
         catch(Exception e)
         {
             await JsRuntime.InvokeVoidAsync("alert", e.Message);
-        }
+        }  
     }
 
     public void BackToDetails()

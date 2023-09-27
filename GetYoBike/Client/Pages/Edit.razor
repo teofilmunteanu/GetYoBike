@@ -125,6 +125,14 @@
     protected override async Task OnInitializedAsync()
     {
         //if the email is changed to one not owned by a user, create a user, otherwise, give this rent to that user
+        try
+        {
+            RentModel? currentRent = await Http.GetFromJsonAsync<RentModel>($"api/Rents/{RentId}");
+        }
+        catch(HttpRequestException e)
+        {
+            
+        }
     }
 
 }
