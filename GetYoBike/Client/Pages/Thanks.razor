@@ -48,6 +48,7 @@
         await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "user");
         await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "startDateTime");
         await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "endDateTime");
+        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "price");
     }
 
     protected override async Task OnInitializedAsync()

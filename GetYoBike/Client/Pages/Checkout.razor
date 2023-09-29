@@ -111,13 +111,17 @@
                 BikeTypeColor = "#DB7A50";
                 break;
         }
-
-        SetPrice();
     }
 
-    private void SetPrice()
+    protected override async Task OnInitializedAsync()
     {
-        Price = RentSvc.Price;
+        await SetPrice();
+    }
+
+    private async Task SetPrice()
+    {
+        string priceString = await JsRuntime.InvokeAsync<string>("sessionStorage.getItem", "price");
+        Price = decimal.Parse(priceString);
     }
 
     private async Task<BikeModel> GetAnAvailableBike()
@@ -179,7 +183,6 @@
 
     public async Task ConfirmRent()
     {
-        string message = "";
         try
         {
             RentModel rent = await CreateRent();
@@ -215,8 +218,6 @@
 
     public void BackToDetails()
     {
-        //Eventually give the parameters back(two types of @page) -- save in local storage
-        //$"/checkout?id={user.Id}&type={bikeTypeNr}&date={RentDate}&duration={RentDuration}"
         NavManager.NavigateTo($"/details/{BikeTypeNr}");
     }
 }

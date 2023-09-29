@@ -114,7 +114,7 @@
     {
         if (EditPIN == InputEditPIN)
         {
-            NavManager.NavigateTo("/edit/"+rentId);
+            NavManager.NavigateTo($"/edit?email={Email}&rentId={rentId}");
         }
         else
         {

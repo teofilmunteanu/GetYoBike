@@ -139,7 +139,7 @@
         SetDatesAndPrice();
     }
 
-    private void SetDatesAndPrice()
+    private async Task SetDatesAndPrice()
     {
         dateTimeStart = RentStartDate.ToDateTime(new TimeOnly(RentStartTime.Hour, RentStartTime.Minute, 0));
         dateTimeEnd = RentEndDate.ToDateTime(new TimeOnly(RentEndTime.Hour, RentEndTime.Minute, 0));
@@ -147,6 +147,8 @@
 
         RentSvc.CalculatePrice(RentSvc.DurationHours, pricePerH);
         Price = RentSvc.Price;
+
+        await JsRuntime.InvokeVoidAsync("sessionStorage.setItem", "price", JsonSerializer.Serialize(Price));
     }
 
     private async void SaveSessionForm(UserModel user, DateTime StartDateTime, DateTime EndDateTime)
