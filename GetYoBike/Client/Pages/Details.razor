@@ -42,25 +42,25 @@
                     <label for="rent" class="formLabel">Start Date</label>
                     <br />
                     <input type="date" name="StartDate" class="rentDate"
-                           @bind="RentStartDate" @bind:after="SetDatesAndPrice" />
+                           @bind="RentStartDate" @bind:after="@(()=>SetDatesAndPrice(RentStartDate, RentStartTime, RentEndDate, RentEndTime))" />
                 </div>
                 <div class="timeStart-grid">
                     <label for="duration" class="formLabel">Start Time</label>
                     <br />
                     <input type="time" name="StartTime" class="rentTime" placeholder="hh"
-                           @bind="RentStartTime" @bind:after="SetDatesAndPrice">
+                           @bind="RentStartTime" @bind:after="@(()=>SetDatesAndPrice(RentStartDate, RentStartTime, RentEndDate, RentEndTime))">
                 </div>
                 <div class="dateEnd-grid">
                     <label for="rent" class="formLabel">End Date</label>
                     <br />
                     <input type="date" name="EndDate" class="rentDate"
-                           @bind="RentEndDate" @bind:after="SetDatesAndPrice" />
+                           @bind="RentEndDate" @bind:after="@(()=>SetDatesAndPrice(RentStartDate, RentStartTime, RentEndDate, RentEndTime))" />
                 </div>
                 <div class="timeEnd-grid">
                     <label for="duration" class="formLabel">End Time</label>
                     <br />
                     <input type="time" name="EndTime" class="rentTime" placeholder="hh"
-                           @bind="RentEndTime" @bind:after="SetDatesAndPrice">
+                           @bind="RentEndTime" @bind:after="@(()=>SetDatesAndPrice(RentStartDate, RentStartTime, RentEndDate, RentEndTime))">
                 </div>
                 <br />
             </div>
@@ -84,6 +84,7 @@
 </div>
 
 @code {
+    //CHANGE TO STRING AND SEARCH BY TYPE NAME (??)
     [Parameter]
     public int BikeTypeNr { get; set; }
 
@@ -136,10 +137,10 @@
         BikeTypeModel bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + BikeTypeNr);
         pricePerH = bikeType.Price;
 
-        SetDatesAndPrice();
+        await SetDatesAndPrice(RentStartDate, RentStartTime, RentEndDate, RentEndTime);
     }
 
-    private async Task SetDatesAndPrice()
+    private async Task SetDatesAndPrice(DateOnly rentStartDate, TimeOnly rentStartTime, DateOnly rentEndDate, TimeOnly rentEndTime)
     {
         dateTimeStart = RentStartDate.ToDateTime(new TimeOnly(RentStartTime.Hour, RentStartTime.Minute, 0));
         dateTimeEnd = RentEndDate.ToDateTime(new TimeOnly(RentEndTime.Hour, RentEndTime.Minute, 0));

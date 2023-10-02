@@ -2,9 +2,13 @@
 
 @inject IJSRuntime JsRuntime
 @using GetYoBike.Shared.Models;
+@using System.Net;
+@using System.Text.Json;
+@using System.Text;
 @inject NavigationManager NavManager
 @inject HttpClient Http
 @inject Services.RentService RentSvc
+@inject Services.BikeService BikeSvc
 
 @*check if edit pin was inserted*@
 <Header Title="Edit Rent Details" />
@@ -82,7 +86,7 @@
             <div class="total">
                 <span>Total: @Price lei</span>
             </div>
-            <button class="buttonc" style="vertical-align:middle">
+            <button class="buttonc" style="vertical-align:middle" @onclick=ChangeRentData>
                 <span>Confirm Changes</span>
             </button>
         </div>
@@ -104,17 +108,23 @@
     public TimeOnly RentStartTime { get; set; }
     public TimeOnly RentEndTime { get; set; }
 
-    private decimal rentDuration;
-    private decimal pricePerH;
+    decimal pricePerH;
     DateTime dateTimeStart;
     DateTime dateTimeEnd;
+
+    RentModel? currentRent;
+    UserModel? currentUser;
+    BikeModel? currentBike;
+    int initialBikeTypeNr;
+    string initialEmail = "";
+
 
     private async Task SetBikeType(int BikeTypeNr)
     {
         BikeTypeModel? bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + BikeTypeNr);
         pricePerH = bikeType.Price;
 
-        SetPrice(rentDuration, pricePerH);
+        SetPrice(RentSvc.DurationHours, pricePerH);
     }
 
     private void SetDates(DateOnly rentStartDate, TimeOnly rentStartTime, DateOnly rentEndDate, TimeOnly rentEndTime)
@@ -122,7 +132,6 @@
         dateTimeStart = rentStartDate.ToDateTime(new TimeOnly(rentStartTime.Hour, rentStartTime.Minute, 0));
         dateTimeEnd = rentEndDate.ToDateTime(new TimeOnly(rentEndTime.Hour, rentEndTime.Minute, 0));
         RentSvc.SetDuration(dateTimeStart, dateTimeEnd);
-        rentDuration = RentSvc.DurationHours;
 
         SetPrice(RentSvc.DurationHours, pricePerH);
     }
@@ -133,26 +142,108 @@
         Price = RentSvc.Price;
     }
 
+    private void SetInitialRentData(string email, int bikeTypeNr)
+    {
+        initialBikeTypeNr = bikeTypeNr;
+        initialEmail = email;
+    }
+
+    private async Task FetchRentFormData()
+    {
+        currentRent = await Http.GetFromJsonAsync<RentModel>($"api/Rents/{RentId}");
+        currentBike = await Http.GetFromJsonAsync<BikeModel>($"api/Bikes/{currentRent.BikeID}");
+        BikeTypeNr = currentBike.TypeId;
+
+        RentStartDate = DateOnly.FromDateTime(currentRent.StartDate);
+        RentEndDate = DateOnly.FromDateTime(currentRent.EndDate);
+        RentStartTime = TimeOnly.FromDateTime(currentRent.StartDate);
+        RentEndTime = TimeOnly.FromDateTime(currentRent.EndDate);
+
+        await SetBikeType(BikeTypeNr);
+        SetDates(RentStartDate, RentStartTime, RentEndDate, RentEndTime);
+
+        currentUser = await Http.GetFromJsonAsync<UserModel>($"api/Users/{currentRent.UserID}");
+        SetInitialRentData(currentUser.Email, currentBike.TypeId);
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        //if the email is changed to one not owned by a user, create a user, otherwise, give this rent to that user
         try
         {
-            RentModel? currentRent = await Http.GetFromJsonAsync<RentModel>($"api/Rents/{RentId}");
-            BikeModel? currentBike = await Http.GetFromJsonAsync<BikeModel>($"api/Bikes/{currentRent.BikeID}");
-            BikeTypeNr = currentBike.TypeId;
-
-            RentStartDate = DateOnly.FromDateTime(currentRent.StartDate);
-            RentEndDate = DateOnly.FromDateTime(currentRent.EndDate);
-            RentStartTime = TimeOnly.FromDateTime(currentRent.StartDate);
-            RentEndTime = TimeOnly.FromDateTime(currentRent.EndDate);
-
-            await SetBikeType(BikeTypeNr);
-            SetDates(RentStartDate, RentStartTime, RentEndDate, RentEndTime);
+            await FetchRentFormData();
         }
         catch(HttpRequestException e)
         {
-            
+
+        }
+    }
+
+    private async Task ChangeRentData()
+    {
+        if (currentRent != null && currentUser != null && currentBike != null)
+        {
+            try
+            {
+                currentRent.StartDate = dateTimeStart;
+                currentRent.EndDate = dateTimeEnd;
+
+                if (initialBikeTypeNr != BikeTypeNr)
+                {
+                    BikeModel? bike = await BikeSvc.GetAnAvailableBike(dateTimeStart, dateTimeEnd, BikeTypeNr);
+                    currentRent.BikeID = bike.Id;
+                }
+
+                //if the email is changed to one not owned by a user, create a user, otherwise, give this rent to that user
+                if (initialEmail != Email)
+                {
+                    var getUserResponse = await Http.GetAsync("api/Users/FindUserByEmail/" + Email);
+
+                    if (getUserResponse.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        UserModel newUser = new UserModel
+                            {
+                                Email = this.Email,
+                                LastName = currentUser.LastName,
+                                FirstName = currentUser.FirstName,
+                                Age = currentUser.Age
+                            };
+                        //create a user by using the old user details
+                        await Http.PostAsJsonAsync($"api/Users/", newUser);
+                    }
+                    else if (getUserResponse.IsSuccessStatusCode)
+                    {
+                        var getUserResponseContent = await getUserResponse.Content.ReadAsStringAsync();
+                        UserModel? anotherUser = JsonSerializer.Deserialize<UserModel>(getUserResponseContent, new JsonSerializerOptions
+                            {
+                                PropertyNameCaseInsensitive = true
+                            });
+                        //give the rent to the other user that exists
+                        if (anotherUser != null)
+                        {
+                            currentRent.UserID = anotherUser.Id;
+                        }
+                        else
+                        {
+                            throw new Exception("Failed to load the information of the new user!");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("An unexpected error occured while searching the user: " + await getUserResponse.Content.ReadAsStringAsync());
+                    }
+                }
+                
+
+                await Http.PutAsJsonAsync($"api/Rents/{currentRent.Id}", currentRent);
+            }
+            catch(Exception e)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", e.Message);
+            }
+        }
+        else
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "The rent details failed to load.");
         }
     }
 
