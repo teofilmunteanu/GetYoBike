@@ -69,7 +69,7 @@
         var response = await Http.GetAsync("api/Users/FindUserByEmail/" + Email);
         if (response.IsSuccessStatusCode)
         {
-            var responseContent = response.Content.ReadAsStringAsync().Result;
+            var responseContent = await response.Content.ReadAsStringAsync();
             UserModel? user = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
@@ -101,7 +101,7 @@
         }
         else
         {
-            message = response.Content.ReadAsStringAsync().Result;
+            message = await response.Content.ReadAsStringAsync();
         }
 
         if (message != "")

@@ -2,6 +2,7 @@
 @using System.Text.Json;
 @using GetYoBike.Shared.Models;
 @using System.Globalization;
+@using System.Net;
 @inject Services.RentService RentSvc
 @inject IJSRuntime JsRuntime
 @inject HttpClient Http
@@ -42,15 +43,6 @@
     public string Email { get; set; } = "";
 
 
-
-    private async Task ClearSessionData()
-    {
-        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "user");
-        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "startDateTime");
-        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "endDateTime");
-        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "price");
-    }
-
     protected override async Task OnInitializedAsync()
     {
         if(BikeTypeNr == 1)
@@ -69,44 +61,58 @@
             TypeColor = "white";
         }
 
+        await RetrieveRentData();
+
+        await ClearSessionData();
+    }
+
+    private async Task RetrieveRentData()
+    {
         try
         {
             RentModel? rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/" + RentId);
-            UserModel? user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
-            EditPIN = rent.EditPIN;
-            Email = user.Email;
+            if (rent != null)
+            {
+                EditPIN = rent.EditPIN;
+
+                UserModel? user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
+                if (user != null)
+                {
+                    Email = user.Email;
+                }
+                else
+                {
+                    throw new Exception("A problem occured during deserialization of user data.");
+                }
+            }
+            else
+            {
+                throw new Exception("A problem occured during deserialization of rent data.");
+            }
         }
-        catch(Exception e)
+        catch (HttpRequestException e)
+        {
+            if (e.StatusCode == HttpStatusCode.NotFound)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Rent data not found!");
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "A problem occured during rent data retrieval.");
+            }
+        }
+        catch (Exception e)
         {
             await JsRuntime.InvokeVoidAsync("alert", e.Message);
         }
+       
+    }
 
-        await ClearSessionData();
-        //If it's the first time the page is loaded, CurrentRent wouldn't be null
-        //if (RentSvc.CurrentRent != null)
-        //{
-        //    string startDateTimeString = RentSvc.CurrentRent.StartDate.ToString("yyyy-MM-dd-HH-mm");
-        //    string endDateTimeString = RentSvc.CurrentRent.EndDate.ToString("yyyy-MM-dd-HH-mm");
-        //    int userId = RentSvc.CurrentRent.UserID;
-        //    int bikeId = RentSvc.CurrentRent.BikeID;
-
-        //    //search rent by BikeId, UserId, startdate, enddate
-        //    RentModel rent = await Http.GetFromJsonAsync<RentModel>("api/Rents/getRentByDates?userId=" + userId + "&bikeId=" + bikeId + "&startDateTime=" + startDateTimeString + "&endDateTime=" + endDateTimeString);
-        //    UserModel user = await Http.GetFromJsonAsync<UserModel>("api/Users/" + rent.UserID);
-
-        //    EditPIN = rent.EditPIN;
-        //    Email = user.Email;
-
-        //    await JsRuntime.InvokeVoidAsync("localStorage.setItem", "rentEditPIN", JsonSerializer.Serialize(rent.EditPIN));
-        //    await JsRuntime.InvokeVoidAsync("localStorage.setItem", "userEmail", JsonSerializer.Serialize(user.Email));
-        //}
-        //else
-        //{
-        //    string rentEditPIN_json = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "rentEditPIN");
-        //    EditPIN = JsonSerializer.Deserialize<string>(rentEditPIN_json);
-
-        //    string userEmail_json = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "userEmail");
-        //    Email = JsonSerializer.Deserialize<string>(userEmail_json);
-        //}
+    private async Task ClearSessionData()
+    {
+        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "user");
+        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "startDateTime");
+        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "endDateTime");
+        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", "price");
     }
 }

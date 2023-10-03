@@ -134,10 +134,42 @@
                 break;
         }
 
-        BikeTypeModel bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + BikeTypeNr);
-        pricePerH = bikeType.Price;
+        try
+        {
+            await FetchBikeTypeData();
+        }
+        catch (Exception e)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", e.Message);
+        }
+        
+    }
 
-        await SetDatesAndPrice(RentStartDate, RentStartTime, RentEndDate, RentEndTime);
+    private async Task FetchBikeTypeData()
+    {
+        var bikeTypeResponse = await Http.GetAsync("api/BikeTypes/" + BikeTypeNr);
+        if (bikeTypeResponse.IsSuccessStatusCode)
+        {
+            string bikeTypeResponseJson = await bikeTypeResponse.Content.ReadAsStringAsync();
+            BikeTypeModel? bikeType = JsonSerializer.Deserialize<BikeTypeModel>(bikeTypeResponseJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            if (bikeType != null)
+            {
+                pricePerH = bikeType.Price;
+                await SetDatesAndPrice(RentStartDate, RentStartTime, RentEndDate, RentEndTime);
+            }
+            else
+            {
+                throw new Exception("A problem occured during deserialization of the bike type.");
+            }
+        }
+        else
+        {
+            throw new Exception("A problem occured during bike type retrieval! Cannot set price.");
+        }
     }
 
     private async Task SetDatesAndPrice(DateOnly rentStartDate, TimeOnly rentStartTime, DateOnly rentEndDate, TimeOnly rentEndTime)
@@ -167,11 +199,18 @@
 
         if (!(string.IsNullOrEmpty(rentUser_json) || string.IsNullOrEmpty(rentDateStart_json) || string.IsNullOrEmpty(rentDateEnd_json)))
         {
-            UserModel sessionUser = JsonSerializer.Deserialize<UserModel>(rentUser_json);
-            Email = sessionUser.Email;
-            LastName = sessionUser.LastName;
-            FirstName = sessionUser.FirstName;
-            Age = sessionUser.Age;
+            UserModel? sessionUser = JsonSerializer.Deserialize<UserModel>(rentUser_json);
+            if(sessionUser != null)
+            {
+                Email = sessionUser.Email;
+                LastName = sessionUser.LastName;
+                FirstName = sessionUser.FirstName;
+                Age = sessionUser.Age;
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "A problem occured during deserialization of the user data.");
+            }
 
             DateTime sessionDateTimeStart = JsonSerializer.Deserialize<DateTime>(rentDateStart_json);
             DateTime sessionDateTimeEnd = JsonSerializer.Deserialize<DateTime>(rentDateEnd_json);
@@ -206,7 +245,7 @@
                         };
 
                     var response = await Http.PostAsJsonAsync("/api/Users/", userForm);
-                    var responseContent = response.Content.ReadAsStringAsync().Result;
+                    var responseContent = await response.Content.ReadAsStringAsync();
                     user = JsonSerializer.Deserialize<UserModel>(responseContent, new JsonSerializerOptions
                         {
                             PropertyNameCaseInsensitive = true
@@ -214,7 +253,7 @@
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        message = response.Content.ReadAsStringAsync().Result;
+                        message = await response.Content.ReadAsStringAsync();
                     }
                 }
                 else

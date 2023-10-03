@@ -119,12 +119,43 @@
     string initialEmail = "";
 
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await FetchRentFormData();
+        }
+        catch (Exception e)
+        {
+            await JsRuntime.InvokeVoidAsync("alert", e.Message);
+        }
+    }
+
     private async Task SetBikeType(int BikeTypeNr)
     {
-        BikeTypeModel? bikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + BikeTypeNr);
-        pricePerH = bikeType.Price;
+        var bikeTypeResponse = await Http.GetAsync("api/BikeTypes/" + BikeTypeNr);
+        if (bikeTypeResponse.IsSuccessStatusCode)
+        {
+            string bikeTypeResponseJson = await bikeTypeResponse.Content.ReadAsStringAsync();
+            BikeTypeModel? bikeType = JsonSerializer.Deserialize<BikeTypeModel>(bikeTypeResponseJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
 
-        SetPrice(RentSvc.DurationHours, pricePerH);
+            if (bikeType != null)
+            {
+                pricePerH = bikeType.Price;
+                SetPrice(RentSvc.DurationHours, pricePerH);
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "A problem occured during deserialization of the bike type.");
+            }
+        }
+        else
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "A problem occured during bike type retrieval! Cannot set price.");
+        }
     }
 
     private void SetDates(DateOnly rentStartDate, TimeOnly rentStartTime, DateOnly rentEndDate, TimeOnly rentEndTime)
@@ -150,31 +181,43 @@
 
     private async Task FetchRentFormData()
     {
-        currentRent = await Http.GetFromJsonAsync<RentModel>($"api/Rents/{RentId}");
-        currentBike = await Http.GetFromJsonAsync<BikeModel>($"api/Bikes/{currentRent.BikeID}");
-        BikeTypeNr = currentBike.TypeId;
-
-        RentStartDate = DateOnly.FromDateTime(currentRent.StartDate);
-        RentEndDate = DateOnly.FromDateTime(currentRent.EndDate);
-        RentStartTime = TimeOnly.FromDateTime(currentRent.StartDate);
-        RentEndTime = TimeOnly.FromDateTime(currentRent.EndDate);
-
-        await SetBikeType(BikeTypeNr);
-        SetDates(RentStartDate, RentStartTime, RentEndDate, RentEndTime);
-
-        currentUser = await Http.GetFromJsonAsync<UserModel>($"api/Users/{currentRent.UserID}");
-        SetInitialRentData(currentUser.Email, currentBike.TypeId);
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
         try
         {
-            await FetchRentFormData();
-        }
-        catch(HttpRequestException e)
-        {
+            currentRent = await Http.GetFromJsonAsync<RentModel>($"api/Rents/{RentId}");
+            if (currentRent != null)
+            {
+                currentBike = await Http.GetFromJsonAsync<BikeModel>($"api/Bikes/{currentRent.BikeID}");
 
+                if (currentBike != null)
+                {
+                    BikeTypeNr = currentBike.TypeId;
+
+                    RentStartDate = DateOnly.FromDateTime(currentRent.StartDate);
+                    RentEndDate = DateOnly.FromDateTime(currentRent.EndDate);
+                    RentStartTime = TimeOnly.FromDateTime(currentRent.StartDate);
+                    RentEndTime = TimeOnly.FromDateTime(currentRent.EndDate);
+
+                    await SetBikeType(BikeTypeNr);
+                    SetDates(RentStartDate, RentStartTime, RentEndDate, RentEndTime);
+
+                    currentUser = await Http.GetFromJsonAsync<UserModel>($"api/Users/{currentRent.UserID}");
+                    if (currentUser != null)
+                    {
+                        SetInitialRentData(currentUser.Email, currentBike.TypeId);
+                    }
+                }
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            if (e.StatusCode == HttpStatusCode.NotFound)
+            {
+                throw new Exception("Rent data not found!");
+            }
+            else
+            {
+                throw new Exception("A problem occured during the retrieval of current rent data.");
+            }
         }
     }
 

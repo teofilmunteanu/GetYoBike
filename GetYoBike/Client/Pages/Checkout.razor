@@ -125,8 +125,6 @@
         Price = decimal.Parse(priceString);
     }
 
-    
-
     private async Task<RentModel> CreateRent()
     {
         DateTime rentStartDate, rentEndDate;
@@ -162,7 +160,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                string responseContent = response.Content.ReadAsStringAsync().Result;
+                string responseContent = await response.Content.ReadAsStringAsync();
                 RentModel? createdRent = JsonSerializer.Deserialize<RentModel>(responseContent, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
@@ -178,7 +176,7 @@
             }
             else
             {
-                throw new Exception(response.Content.ReadAsStringAsync().Result);
+                throw new Exception(await response.Content.ReadAsStringAsync());
             }
         }
         catch(Exception e)
