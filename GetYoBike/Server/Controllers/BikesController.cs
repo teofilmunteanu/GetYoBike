@@ -148,33 +148,41 @@ namespace GetYoBike.Server.Controllers
         //get list of bikes that are not rented in specified interval
         // GET: api/Bikes/availableBikesInInterval/dateTime?=2011-08-12T20:17:46.384Z&duration=5
         [HttpGet("availableBikesInInterval")]
-        public async Task<ActionResult<List<Bike>>> GetAvailableBikes([BindRequired] string startDateTime, [BindRequired] string endDateTime, [BindRequired] int bikeTypeId)
+        public async Task<ActionResult<List<Bike>>> GetAvailableBikes([BindRequired] string startDateTime, [BindRequired] string endDateTime, [BindRequired] string bikeTypeString)
         {
             DateTime startDateFormatted;
             DateTime endDateFormatted;
             List<Rent> rentsInInterval = new List<Rent>();
             List<Bike> availableBikes = new List<Bike>();
 
-            bool startDateParseSuccessfuly = DateTime.TryParseExact(startDateTime, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out startDateFormatted);
-            bool endDateParseSuccessfuly = DateTime.TryParseExact(endDateTime, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out endDateFormatted);
+            bool startDateParsed = DateTime.TryParseExact(startDateTime, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out startDateFormatted);
+            bool endDateParsed = DateTime.TryParseExact(endDateTime, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out endDateFormatted);
+            bool bikeTypeParsed = Enum.TryParse(bikeTypeString, out TypesModel bikeType);
 
-            if (startDateParseSuccessfuly && endDateParseSuccessfuly)
+            if (startDateParsed && endDateParsed)
             {
-                List<int> unavailableBikesIds = new List<int>();
+                if (bikeTypeParsed)
+                {
+                    List<int> unavailableBikesIds = new List<int>();
 
-                List<Rent> rents = _context.Rents.Include(r => r.RentedBike).ToList();
+                    List<Rent> rents = _context.Rents.Include(r => r.RentedBike).ToList();
 
-                List<Rent> activeRents = rents.Where(
-                    r => r.StartDate >= startDateFormatted && r.EndDate <= endDateFormatted
-                ).ToList();
-                activeRents.ForEach(r => unavailableBikesIds.Add(r.RentedBike.Id));
+                    List<Rent> activeRents = rents.Where(
+                        r => r.StartDate >= startDateFormatted && r.EndDate <= endDateFormatted
+                    ).ToList();
+                    activeRents.ForEach(r => unavailableBikesIds.Add(r.RentedBike.Id));
 
-                //check if any of the active rents has a bike of the selected type, and add that bike to the list if not       
-                availableBikes = _context.Bikes.Where(b => b.TypeId == bikeTypeId && !(unavailableBikesIds.Contains(b.Id))).ToList();
+                    //check if any of the active rents has a bike of the selected type, and add that bike to the list if not       
+                    availableBikes = _context.Bikes.Where(b => b.Type.Type == bikeType && !(unavailableBikesIds.Contains(b.Id))).ToList();
+                }
+                else
+                {
+                    return BadRequest("Invalid bike type!");
+                }
             }
             else
             {
-                return BadRequest("Invalid rent dates");
+                return BadRequest("Invalid rent dates!");
             }
 
             if (availableBikes.IsNullOrEmpty())

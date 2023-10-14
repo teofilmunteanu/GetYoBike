@@ -12,7 +12,7 @@ namespace GetYoBike.Client.Services
             _httpClient = httpClient;
         }
 
-        public async Task<BikeModel> GetAnAvailableBike(DateTime dateTimeStart, DateTime dateTimeEnd, int bikeTypeNr)
+        public async Task<BikeModel> GetAnAvailableBike(DateTime dateTimeStart, DateTime dateTimeEnd, TypesModel bikeType)
         {
             string startDateTimeString = dateTimeStart.ToString("yyyy-MM-dd-HH-mm");
             string endDateTimeString = dateTimeEnd.ToString("yyyy-MM-dd-HH-mm");
@@ -23,7 +23,7 @@ namespace GetYoBike.Client.Services
                     $"api/Bikes/availableBikesInInterval?" +
                     $"startDateTime={startDateTimeString}" +
                     $"&endDateTime={endDateTimeString}" +
-                    $"&bikeTypeId={bikeTypeNr}"
+                    $"&bikeType={bikeType}"
                 );
 
                 if (availableBikes != null)

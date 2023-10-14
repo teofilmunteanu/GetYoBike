@@ -45,20 +45,23 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if(BikeTypeNr == 1)
+        if (Enum.TryParse(BikeTypeString, out TypesModel bikeType))
         {
-            BikeTypeString = "City";
-            TypeColor = "#6594EF";
-        }
-        else if(BikeTypeNr == 2)
-        {
-            BikeTypeString = "Mountain";
-            TypeColor = "#DB7A50";
+            switch (bikeType)
+            {
+                case TypesModel.city:
+                    BikeTypeString = "City";
+                    TypeColor = "#6594EF";
+                    break;
+                case TypesModel.mountain:
+                    BikeTypeString = "Mountain";
+                    TypeColor = "#DB7A50";
+                    break;
+            }
         }
         else
         {
-            BikeTypeString = "Default";
-            TypeColor = "white";
+            await JsRuntime.InvokeVoidAsync("alert", "Invalid bike type!");
         }
 
         await RetrieveRentData();

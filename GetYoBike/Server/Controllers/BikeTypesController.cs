@@ -23,7 +23,7 @@ namespace GetYoBike.Server.Controllers
             {
                 Id = bikeTypeModel.Id,
                 Price = bikeTypeModel.Price,
-                Type = (Types)bikeTypeModel.Type
+                Type = bikeTypeModel.Type
             };
         }
 
@@ -67,6 +67,26 @@ namespace GetYoBike.Server.Controllers
             }
 
             return Ok(EntityToModel(bikeType));
+        }
+
+        [HttpGet("getByName/{typeName}")]
+        public async Task<ActionResult<BikeTypeModel>> GetBikeTypeByName(string typeName)
+        {
+            bool bikeTypeParsed = Enum.TryParse(typeName, out TypesModel bikeType);
+
+            if (_context.BikeTypes == null || !bikeTypeParsed)
+            {
+                return NotFound();
+            }
+
+            //var bikeType = await _context.BikeTypes.FindAsync(id);
+            BikeType bikeTypeEntity = await _context.BikeTypes.Where(b => b.Type == bikeType).FirstAsync();
+            if (bikeTypeEntity == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(EntityToModel(bikeTypeEntity));
         }
 
         // PUT: api/BikeTypes/5

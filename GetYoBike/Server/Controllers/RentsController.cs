@@ -114,7 +114,7 @@ namespace GetYoBike.Server.Controllers
             if (startDateParseSuccessfuly && endDateParseSuccessfuly)
             {
                 //List<Rent> rentsWithBikes = await _context.Rents.Include(r => r.RentedBike).ToListAsync();
-                Rent rent = _context.Rents.Where(
+                Rent? rent = _context.Rents.Where(
                     r => r.RenterUserId == userId && r.RentedBikeId == bikeId && r.StartDate == startDateFormatted && r.EndDate == endDateFormatted
                 ).FirstOrDefault();
 
@@ -134,7 +134,6 @@ namespace GetYoBike.Server.Controllers
         // PUT: api/Rents/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        //functiile put sunt cele care dau UPDATE la ceva din DB
         public async Task<IActionResult> PutRent(int id, RentModel rentModel)
         {
             Rent rent = ModelToEntity(rentModel);
@@ -225,26 +224,6 @@ namespace GetYoBike.Server.Controllers
         {
             return (_context.Rents?.Any(e => e.RenterUserId == id)).GetValueOrDefault();
         }
-
-        /// handle all changes from a single put, or make separate ones?
-        //[HttpPut("changeDates{'id'}")]
-        //public async Task<IActionResult> ChangeDates(int id, Rent rent)
-        //{
-        //    //modific data, nu userii, deci inlocuiesc cu rents si lucrez pe rents
-        //    var ToUpdateRent = await _context.Rents.FindAsync(id);
-        //    if (ToUpdateRent == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    if (rent.DateIsValid())
-        //    {
-        //        ToUpdateRent.StartDate = rent.StartDate;
-        //        ToUpdateRent.EndDate = rent.EndDate;
-        //        await _context.SaveChangesAsync();
-        //        return Ok(ToUpdateRent);
-        //    }
-        //    return BadRequest("Invalid rent dates.");
-        //}
 
         [HttpGet("getRentsOfUser/{id}")]
         public async Task<ActionResult<IEnumerable<UserModel>>> GetRentsOfUser(int id)

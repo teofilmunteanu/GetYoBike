@@ -1,13 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GetYoBike.Shared.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace GetYoBike.Server.Entities
 {
-    public enum Types
-    {
-        city,
-        mountain
-    }
-
     public class BikeType
     {
         public int Id { get; set; }
@@ -16,7 +11,7 @@ namespace GetYoBike.Server.Entities
         public decimal Price { get; set; }
 
         [Required]
-        public Types Type { get; set; }
+        public TypesModel Type { get; set; }
 
         public ICollection<Bike>? Bikes { get; set; }
     }

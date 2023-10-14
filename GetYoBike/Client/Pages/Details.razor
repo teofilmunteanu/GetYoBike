@@ -1,4 +1,4 @@
-﻿@page "/details/{BikeTypeNr:int}"
+﻿@page "/details/{BikeType}"
 
 
 @inject IJSRuntime JsRuntime
@@ -86,7 +86,7 @@
 @code {
     //CHANGE TO STRING AND SEARCH BY TYPE NAME (??)
     [Parameter]
-    public int BikeTypeNr { get; set; }
+    public string BikeType { get; set; } = "";
 
     public decimal Price { get; set; } = 0;
     public string SelectedImagePath { get; set; } = "";
@@ -120,18 +120,25 @@
         RentStartTime = TimeOnly.FromDateTime(DateTime.Now);
         RentEndTime = TimeOnly.FromDateTime(DateTime.Now);
 
-        switch (BikeTypeNr)
+        if (Enum.TryParse(BikeType, out TypesModel bikeType))
         {
-            case 1:
-                SelectedImagePath = "assets/rentCityBike.png";
-                BikeTypeTitle = "Rent City Bike";
-                BikeTypeColor = "#6594EF";
-                break;
-            case 2:
-                SelectedImagePath = "assets/rentMountainBike.png";
-                BikeTypeTitle = "Rent Mountain Bike";
-                BikeTypeColor = "#DB7A50";
-                break;
+            switch (bikeType)
+            {
+                case TypesModel.city:
+                    SelectedImagePath = "assets/rentCityBike.png";
+                    BikeTypeTitle = "Rent City Bike";
+                    BikeTypeColor = "#6594EF";
+                    break;
+                case TypesModel.mountain:
+                    SelectedImagePath = "assets/rentMountainBike.png";
+                    BikeTypeTitle = "Rent Mountain Bike";
+                    BikeTypeColor = "#DB7A50";
+                    break;
+            }
+        }
+        else
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "This bike type doesn't exist!");
         }
 
         try
@@ -147,7 +154,7 @@
 
     private async Task FetchBikeTypeData()
     {
-        var bikeTypeResponse = await Http.GetAsync("api/BikeTypes/" + BikeTypeNr);
+        var bikeTypeResponse = await Http.GetAsync("api/BikeTypes/" + BikeType);
         if (bikeTypeResponse.IsSuccessStatusCode)
         {
             string bikeTypeResponseJson = await bikeTypeResponse.Content.ReadAsStringAsync();
@@ -273,7 +280,7 @@
 
                 SaveSessionForm(user, dateTimeStart, dateTimeEnd);
 
-                NavManager.NavigateTo($"/checkout?userId={user.Id}&type={BikeTypeNr}&startDate={startDateTimeString}&endDate={endDateTimeString}");
+                NavManager.NavigateTo($"/checkout?userId={user.Id}&type={BikeType}&startDate={startDateTimeString}&endDate={endDateTimeString}");
             }
             else
             {

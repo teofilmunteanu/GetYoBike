@@ -72,7 +72,7 @@
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "type")]
-    public int BikeTypeNr { get; set; }
+    public string BikeType { get; set; } = "";
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "startDate")]
@@ -97,25 +97,32 @@
 
     protected override void OnInitialized()
     {
-        CardExpDate = DateTime.Now;
-
-        switch (BikeTypeNr)
-        {
-            case 1:
-                SelectedImagePath = "assets/rentCityBike.png";
-                BikeTypeTitle = "Rent City Bike";
-                BikeTypeColor = "#6594EF";
-                break;
-            case 2:
-                SelectedImagePath = "assets/rentMountainBike.png";
-                BikeTypeTitle = "Rent Mountain Bike";
-                BikeTypeColor = "#DB7A50";
-                break;
-        }
+        CardExpDate = DateTime.Now;    
     }
 
     protected override async Task OnInitializedAsync()
     {
+        if (Enum.TryParse(BikeType, out TypesModel bikeType))
+        {
+            switch (bikeType)
+            {
+                case TypesModel.city:
+                    SelectedImagePath = "assets/rentCityBike.png";
+                    BikeTypeTitle = "Rent City Bike";
+                    BikeTypeColor = "#6594EF";
+                    break;
+                case TypesModel.mountain:
+                    SelectedImagePath = "assets/rentMountainBike.png";
+                    BikeTypeTitle = "Rent Mountain Bike";
+                    BikeTypeColor = "#DB7A50";
+                    break;
+            }
+        }
+        else
+        {
+            await JsRuntime.InvokeVoidAsync("alert", "This bike type doesn't exist!");
+        }
+
         await SetPrice();
     }
 
@@ -128,26 +135,42 @@
     private async Task<RentModel> CreateRent()
     {
         DateTime rentStartDate, rentEndDate;
-        DateTime.TryParseExact(StartDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentStartDate);
-        DateTime.TryParseExact(EndDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentEndDate);
-        
-        BikeModel? bike = await BikeSvc.GetAnAvailableBike(rentStartDate, rentEndDate, BikeTypeNr);
-         
-        RentModel rent = new RentModel()
-            {
-                UserID = this.UserId,
-                BikeID = bike.Id,
-                StartDate = rentStartDate,
-                EndDate = rentEndDate,
-                CardNr = this.NrCard.ToString(),
-                CardCVC = this.CardCVC,
-                CardExpMonth = CardExpDate.Month.ToString(),
-                CardExpYear = CardExpDate.Year.ToString(),
-                CardHolderName = this.CardName,
-                EditPIN = ""
-            };
+        bool startDateParsed = DateTime.TryParseExact(StartDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentStartDate);
+        bool endDateParsed = DateTime.TryParseExact(EndDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentEndDate);
+        bool bikeTypeParsed = Enum.TryParse(BikeType, out TypesModel bikeType);
 
-        return rent;
+        if(startDateParsed && endDateParsed)
+        {
+            if (bikeTypeParsed)
+            {
+                BikeModel? bike = await BikeSvc.GetAnAvailableBike(rentStartDate, rentEndDate, bikeType);
+
+                RentModel rent = new RentModel()
+                    {
+                        UserID = this.UserId,
+                        BikeID = bike.Id,
+                        StartDate = rentStartDate,
+                        EndDate = rentEndDate,
+                        CardNr = this.NrCard.ToString(),
+                        CardCVC = this.CardCVC,
+                        CardExpMonth = CardExpDate.Month.ToString(),
+                        CardExpYear = CardExpDate.Year.ToString(),
+                        CardHolderName = this.CardName,
+                        EditPIN = ""
+                    };
+
+                return rent;
+            }
+            else
+            {
+                throw new Exception("Invalid bike type!");
+            }
+        }
+        else
+        {
+            throw new Exception("Invalid rent dates!");
+        }
+
     }
 
     public async Task ConfirmRent()
@@ -167,7 +190,7 @@
                     });
                 if(createdRent != null)
                 {
-                    NavManager.NavigateTo($"/thanks/?type={BikeTypeNr}&id={createdRent.Id}");
+                    NavManager.NavigateTo($"/thanks/?type={BikeType}&id={createdRent.Id}");
                 }
                 else
                 {
@@ -187,6 +210,6 @@
 
     public void BackToDetails()
     {
-        NavManager.NavigateTo($"/details/{BikeTypeNr}");
+        NavManager.NavigateTo($"/details/{BikeType}");
     }
 }

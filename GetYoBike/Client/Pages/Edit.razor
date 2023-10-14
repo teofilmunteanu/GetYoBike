@@ -63,12 +63,12 @@
         <div class="wrapper">
             <div class="tabs">
                 <div class="tab">
-                    <input type="radio" name="css-tabs" id="tab-1" class="tab-switch" checked="@(BikeTypeNr == 1)" @onchange="@(async () => {BikeTypeNr = 1; await SetBikeType(BikeTypeNr);})">
+                    <input type="radio" name="css-tabs" id="tab-1" class="tab-switch" checked="@(BikeType == TypesModel.city)" @onchange="@(async () => await SetBikeType(TypesModel.city))">
                     <label for="tab-1" class="tab-label"><img src="assets/buildings.png" class="img-tab"></label>
                     <div class="tab-content"><img src="assets/rentCityBike.png" class="img-div"></div>
                 </div>
                 <div class="tab">
-                    <input type="radio" name="css-tabs" id="tab-2" class="tab-switch" checked="@(BikeTypeNr == 2)" @onchange="@(async () => {BikeTypeNr = 2; await SetBikeType(BikeTypeNr);})">
+                    <input type="radio" name="css-tabs" id="tab-2" class="tab-switch" checked="@(BikeType == TypesModel.mountain)" @onchange="@(async () => await SetBikeType(TypesModel.mountain))">
                     <label for="tab-2" class="tab-label"><img src="assets/mountain.png" class="img-tab"></label>
                     <div class="tab-content"><img src="assets/rentMountainBike.png" class="img-div"></div>
                 </div>
@@ -101,21 +101,21 @@
     public string Email { get; set; } = "";
 
     public decimal Price { get; set; }
-    public int BikeTypeNr { get; set; }
+    public TypesModel BikeType { get; set; }
 
     public DateOnly RentStartDate { get; set; }
     public DateOnly RentEndDate { get; set; }
     public TimeOnly RentStartTime { get; set; }
     public TimeOnly RentEndTime { get; set; }
 
-    decimal pricePerH;
     DateTime dateTimeStart;
     DateTime dateTimeEnd;
 
     RentModel? currentRent;
     UserModel? currentUser;
     BikeModel? currentBike;
-    int initialBikeTypeNr;
+    BikeTypeModel? currentBikeType;
+    TypesModel initialBikeType;
     string initialEmail = "";
 
 
@@ -131,21 +131,23 @@
         }
     }
 
-    private async Task SetBikeType(int BikeTypeNr)
+    //has to have enum bike type as parameter for the binded type change
+    private async Task SetBikeType(TypesModel newBikeType)
     {
-        var bikeTypeResponse = await Http.GetAsync("api/BikeTypes/" + BikeTypeNr);
+        var bikeTypeResponse = await Http.GetAsync("api/BikeTypes/getByName/" + newBikeType.ToString());
         if (bikeTypeResponse.IsSuccessStatusCode)
         {
+            BikeType = newBikeType;
+
             string bikeTypeResponseJson = await bikeTypeResponse.Content.ReadAsStringAsync();
-            BikeTypeModel? bikeType = JsonSerializer.Deserialize<BikeTypeModel>(bikeTypeResponseJson, new JsonSerializerOptions
+            currentBikeType = JsonSerializer.Deserialize<BikeTypeModel>(bikeTypeResponseJson, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
 
-            if (bikeType != null)
+            if (currentBikeType != null)
             {
-                pricePerH = bikeType.Price;
-                SetPrice(RentSvc.DurationHours, pricePerH);
+                SetPrice(RentSvc.DurationHours);
             }
             else
             {
@@ -164,18 +166,21 @@
         dateTimeEnd = rentEndDate.ToDateTime(new TimeOnly(rentEndTime.Hour, rentEndTime.Minute, 0));
         RentSvc.SetDuration(dateTimeStart, dateTimeEnd);
 
-        SetPrice(RentSvc.DurationHours, pricePerH);
+        SetPrice(RentSvc.DurationHours);
     }
 
-    private void SetPrice(decimal durationHours, decimal pricePerH)
+    private void SetPrice(decimal durationHours)
     {
-        RentSvc.CalculatePrice(durationHours, pricePerH);
-        Price = RentSvc.Price;
+        if (currentBikeType != null)
+        {
+            RentSvc.CalculatePrice(durationHours, currentBikeType.Price);
+            Price = RentSvc.Price;
+        }
     }
 
-    private void SetInitialRentData(string email, int bikeTypeNr)
+    private void SetInitialRentData(string email, TypesModel BikeType)
     {
-        initialBikeTypeNr = bikeTypeNr;
+        initialBikeType = BikeType;
         initialEmail = email;
     }
 
@@ -190,21 +195,21 @@
 
                 if (currentBike != null)
                 {
-                    BikeTypeNr = currentBike.TypeId;
+                    currentBikeType = await Http.GetFromJsonAsync<BikeTypeModel>("api/BikeTypes/" + currentBike.TypeId);
+                    currentUser = await Http.GetFromJsonAsync<UserModel>($"api/Users/{currentRent.UserID}");
+
+                    if (currentUser != null && currentBikeType != null)
+                    {
+                        await SetBikeType(currentBikeType.Type);
+                        SetInitialRentData(currentUser.Email, currentBikeType.Type);
+                    }
 
                     RentStartDate = DateOnly.FromDateTime(currentRent.StartDate);
                     RentEndDate = DateOnly.FromDateTime(currentRent.EndDate);
                     RentStartTime = TimeOnly.FromDateTime(currentRent.StartDate);
                     RentEndTime = TimeOnly.FromDateTime(currentRent.EndDate);
 
-                    await SetBikeType(BikeTypeNr);
                     SetDates(RentStartDate, RentStartTime, RentEndDate, RentEndTime);
-
-                    currentUser = await Http.GetFromJsonAsync<UserModel>($"api/Users/{currentRent.UserID}");
-                    if (currentUser != null)
-                    {
-                        SetInitialRentData(currentUser.Email, currentBike.TypeId);
-                    }
                 }
             }
         }
@@ -230,9 +235,9 @@
                 currentRent.StartDate = dateTimeStart;
                 currentRent.EndDate = dateTimeEnd;
 
-                if (initialBikeTypeNr != BikeTypeNr)
+                if (initialBikeType != BikeType)
                 {
-                    BikeModel? bike = await BikeSvc.GetAnAvailableBike(dateTimeStart, dateTimeEnd, BikeTypeNr);
+                    BikeModel? bike = await BikeSvc.GetAnAvailableBike(dateTimeStart, dateTimeEnd, BikeType);
                     currentRent.BikeID = bike.Id;
                 }
 
