@@ -11,7 +11,7 @@
 <div class="wraper">
     <div class="card">
         <div>
-            <b>Thank you for renting a <span style="color:@TypeColor">@BikeTypeString</span> Bicycle!</b>
+            <b>Thank you for renting a <span style="color:@TypeColor">@BikeTypeTitle</span> Bicycle!</b>
         </div><br><br>
         <div>
             To edit the renting detals, please use the following PIN after <br> accessing your rents list on the homepage through the email.
@@ -29,14 +29,13 @@
 @code {
     [Parameter]
     [SupplyParameterFromQuery(Name = "type")]
-    public int BikeTypeNr { get; set; }
+    public string BikeTypeString { get; set; } = "";
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "id")]
     public int RentId { get; set; }
 
-
-    public string BikeTypeString { get; set; } = "";
+    public string BikeTypeTitle { get; set; } = "";
     public string TypeColor { get; set; } = "";
 
     public string EditPIN { get; set; } = "";
@@ -47,14 +46,14 @@
     {
         if (Enum.TryParse(BikeTypeString, out TypesModel bikeType))
         {
+            BikeTypeTitle = char.ToUpper(BikeTypeString[0]) + BikeTypeString.Substring(1).ToLower();
+
             switch (bikeType)
             {
                 case TypesModel.city:
-                    BikeTypeString = "City";
                     TypeColor = "#6594EF";
                     break;
                 case TypesModel.mountain:
-                    BikeTypeString = "Mountain";
                     TypeColor = "#DB7A50";
                     break;
             }

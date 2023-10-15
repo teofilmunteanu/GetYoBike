@@ -80,7 +80,7 @@ namespace GetYoBike.Server.Controllers
             }
 
             //var bikeType = await _context.BikeTypes.FindAsync(id);
-            BikeType bikeTypeEntity = await _context.BikeTypes.Where(b => b.Type == bikeType).FirstAsync();
+            BikeType? bikeTypeEntity = await _context.BikeTypes.Where(b => b.Type == bikeType).FirstOrDefaultAsync();
             if (bikeTypeEntity == null)
             {
                 return NotFound();

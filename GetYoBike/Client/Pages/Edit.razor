@@ -134,7 +134,7 @@
     //has to have enum bike type as parameter for the binded type change
     private async Task SetBikeType(TypesModel newBikeType)
     {
-        var bikeTypeResponse = await Http.GetAsync("api/BikeTypes/getByName/" + newBikeType.ToString());
+        var bikeTypeResponse = await Http.GetAsync("api/BikeTypes/getByName/" + newBikeType);
         if (bikeTypeResponse.IsSuccessStatusCode)
         {
             BikeType = newBikeType;

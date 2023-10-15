@@ -23,7 +23,7 @@ namespace GetYoBike.Client.Services
                     $"api/Bikes/availableBikesInInterval?" +
                     $"startDateTime={startDateTimeString}" +
                     $"&endDateTime={endDateTimeString}" +
-                    $"&bikeType={bikeType}"
+                    $"&bikeTypeString={bikeType}"
                 );
 
                 if (availableBikes != null)

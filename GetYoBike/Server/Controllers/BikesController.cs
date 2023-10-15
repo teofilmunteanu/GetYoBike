@@ -148,8 +148,13 @@ namespace GetYoBike.Server.Controllers
         //get list of bikes that are not rented in specified interval
         // GET: api/Bikes/availableBikesInInterval/dateTime?=2011-08-12T20:17:46.384Z&duration=5
         [HttpGet("availableBikesInInterval")]
-        public async Task<ActionResult<List<Bike>>> GetAvailableBikes([BindRequired] string startDateTime, [BindRequired] string endDateTime, [BindRequired] string bikeTypeString)
+        public async Task<ActionResult<List<BikeModel>>> GetAvailableBikes([BindRequired] string startDateTime, [BindRequired] string endDateTime, [BindRequired] string bikeTypeString)
         {
+            if (_context.Bikes.IsNullOrEmpty())
+            {
+                return NotFound();
+            }
+
             DateTime startDateFormatted;
             DateTime endDateFormatted;
             List<Rent> rentsInInterval = new List<Rent>();
@@ -190,7 +195,7 @@ namespace GetYoBike.Server.Controllers
                 return NotFound();
             }
 
-            return Ok(availableBikes);
+            return Ok(availableBikes.Select(EntityToModel).ToList());
         }
 
         [HttpPut("changeBikeType/{id}")]

@@ -1,4 +1,4 @@
-﻿@page "/details/{BikeType}"
+﻿@page "/details/{BikeTypeString}"
 
 
 @inject IJSRuntime JsRuntime
@@ -84,9 +84,8 @@
 </div>
 
 @code {
-    //CHANGE TO STRING AND SEARCH BY TYPE NAME (??)
     [Parameter]
-    public string BikeType { get; set; } = "";
+    public string BikeTypeString { get; set; } = "";
 
     public decimal Price { get; set; } = 0;
     public string SelectedImagePath { get; set; } = "";
@@ -111,16 +110,16 @@
     protected override void OnInitialized()
     {
         LoadSessionForm();
-    }
 
-    protected override async Task OnInitializedAsync()
-    {
         RentStartDate = DateOnly.FromDateTime(DateTime.Now);
         RentEndDate = DateOnly.FromDateTime(DateTime.Now);
         RentStartTime = TimeOnly.FromDateTime(DateTime.Now);
         RentEndTime = TimeOnly.FromDateTime(DateTime.Now);
+    }
 
-        if (Enum.TryParse(BikeType, out TypesModel bikeType))
+    protected override async Task OnInitializedAsync()
+    {
+        if (Enum.TryParse(BikeTypeString, out TypesModel bikeType))
         {
             switch (bikeType)
             {
@@ -154,18 +153,18 @@
 
     private async Task FetchBikeTypeData()
     {
-        var bikeTypeResponse = await Http.GetAsync("api/BikeTypes/" + BikeType);
+        var bikeTypeResponse = await Http.GetAsync("api/BikeTypes/getByName/" + BikeTypeString);
         if (bikeTypeResponse.IsSuccessStatusCode)
         {
             string bikeTypeResponseJson = await bikeTypeResponse.Content.ReadAsStringAsync();
-            BikeTypeModel? bikeType = JsonSerializer.Deserialize<BikeTypeModel>(bikeTypeResponseJson, new JsonSerializerOptions
+            BikeTypeModel? BikeType = JsonSerializer.Deserialize<BikeTypeModel>(bikeTypeResponseJson, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
 
-            if (bikeType != null)
+            if (BikeType != null)
             {
-                pricePerH = bikeType.Price;
+                pricePerH = BikeType.Price;
                 await SetDatesAndPrice(RentStartDate, RentStartTime, RentEndDate, RentEndTime);
             }
             else
@@ -280,7 +279,7 @@
 
                 SaveSessionForm(user, dateTimeStart, dateTimeEnd);
 
-                NavManager.NavigateTo($"/checkout?userId={user.Id}&type={BikeType}&startDate={startDateTimeString}&endDate={endDateTimeString}");
+                NavManager.NavigateTo($"/checkout?userId={user.Id}&type={BikeTypeString}&startDate={startDateTimeString}&endDate={endDateTimeString}");
             }
             else
             {

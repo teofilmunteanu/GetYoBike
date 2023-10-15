@@ -1,4 +1,5 @@
 ﻿using GetYoBike.Server.Entities;
+using GetYoBike.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GetYoBike.Server.Data
@@ -21,6 +22,7 @@ namespace GetYoBike.Server.Data
             modelBuilder.Entity<Bike>().HasMany(b => b.Rents).WithOne(r => r.RentedBike).HasForeignKey(r => r.RentedBikeId);
             modelBuilder.Entity<User>().HasMany(b => b.Rents).WithOne(u => u.RenterUser).HasForeignKey(u => u.RenterUserId);
             modelBuilder.Entity<BikeType>().HasMany(t => t.Bikes).WithOne(b => b.Type).HasForeignKey(t => t.TypeId);
+            modelBuilder.Entity<BikeType>().Property(e => e.Type).HasConversion(v => v.ToString(), v => (TypesModel)Enum.Parse(typeof(TypesModel), v));
         }
     }
 }

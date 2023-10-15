@@ -4,6 +4,7 @@
 @using GetYoBike.Shared.Models;
 @using System.Globalization;
 @using System.Text.Json;
+@using System.Net;
 @inject NavigationManager NavManager
 @inject HttpClient Http
 @inject Services.RentService RentSvc
@@ -72,7 +73,7 @@
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "type")]
-    public string BikeType { get; set; } = "";
+    public string BikeTypeString { get; set; } = "";
 
     [Parameter]
     [SupplyParameterFromQuery(Name = "startDate")]
@@ -102,7 +103,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (Enum.TryParse(BikeType, out TypesModel bikeType))
+        if (Enum.TryParse(BikeTypeString, out TypesModel bikeType))
         {
             switch (bikeType)
             {
@@ -137,7 +138,7 @@
         DateTime rentStartDate, rentEndDate;
         bool startDateParsed = DateTime.TryParseExact(StartDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentStartDate);
         bool endDateParsed = DateTime.TryParseExact(EndDateString, "yyyy-MM-dd-HH-mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out rentEndDate);
-        bool bikeTypeParsed = Enum.TryParse(BikeType, out TypesModel bikeType);
+        bool bikeTypeParsed = Enum.TryParse(BikeTypeString, out TypesModel bikeType);
 
         if(startDateParsed && endDateParsed)
         {
@@ -190,7 +191,7 @@
                     });
                 if(createdRent != null)
                 {
-                    NavManager.NavigateTo($"/thanks/?type={BikeType}&id={createdRent.Id}");
+                    NavManager.NavigateTo($"/thanks/?type={BikeTypeString}&id={createdRent.Id}");
                 }
                 else
                 {
@@ -210,6 +211,6 @@
 
     public void BackToDetails()
     {
-        NavManager.NavigateTo($"/details/{BikeType}");
+        NavManager.NavigateTo($"/details/{BikeTypeString}");
     }
 }
