@@ -148,6 +148,9 @@ namespace GetYoBike.Server.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+
+                CalculatePrice(rent);
+                await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {

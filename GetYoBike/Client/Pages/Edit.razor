@@ -280,9 +280,10 @@
                         throw new Exception("An unexpected error occured while searching the user: " + await getUserResponse.Content.ReadAsStringAsync());
                     }
                 }
-                
+
 
                 await Http.PutAsJsonAsync($"api/Rents/{currentRent.Id}", currentRent);
+                NavManager.NavigateTo("/");
             }
             catch(Exception e)
             {
